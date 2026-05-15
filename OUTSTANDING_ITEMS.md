@@ -39,6 +39,13 @@ Starting point: current `index.html` (Phase 1 Rev 9). Apply these deltas:
 - Phase 6B: Save system wiring (Saved Library, save buttons, insert saved superset picker)
 - Phase 7: PWA wrapper + export (manifest, service worker, JSON export per WE-39)
 
+## Carryover from 2026-05-15 deploy session
+
+1. **Tag convention question (WE-42 vs WE-46).** Today shipped a changelog entry for the Phase 1 deploy but no git tag. Open: does `we-v1.1` land retroactively on `bc095cc` (Phase 1 deploy point), or wait for Phase 1B / Rev 10 completion? Resolve before tagging anything.
+2. **`gh` CLI PATH gotcha.** Installed at `C:\Program Files\GitHub CLI\gh.exe`. Not on Bash PATH in the deploy-session shell; PowerShell needed `& "..."` call operator. Fresh shell may pick up the system PATH update — test first. Auth persists in OS keyring; no re-login expected.
+3. **Section 1 above is a working checklist, not archival.** As Rev 10 deltas (WE-57–WE-63) ship, remove items rather than checking them in place. When all 8 ship, the section collapses to one line or disappears.
+4. **WE-N citation discipline.** Today's handoff prompt mis-cited WE-29 for the 15-iteration rule (actually in the unnumbered Versioning Protocol preamble; logged in Spec hygiene below). Verify every WE-N citation against the rules doc — including in prompts — before accepting.
+
 ## Open nuances (not deeply resolved)
 
 ### A. Reuse of saved workout templates
