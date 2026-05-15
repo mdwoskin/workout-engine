@@ -14,3 +14,6 @@ desktop.ini
 node_modules/
 dist/
 *.log
+
+# Claude Code (local per-project tool permissions, not portable)
+.claude/settings.local.json
