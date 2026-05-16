@@ -776,6 +776,44 @@
     toast(`Removed ${ex.name}`);
   }
 
+  // ===== WE-58 within-section move logic — ↑ ↓ ⤴ ⤵ =====
+  // All four mutate buildState in place and defensively no-op at boundaries
+  // (the cluster scaffold already greys the disabled buttons; helpers double-check).
+  // Caller is responsible for invoking updateSectionsArea() afterward.
+  function moveExerciseUp(mg, ssIdx, exIdx) {
+    if (exIdx <= 0) return;
+    const exs = buildState[mg][ssIdx].exs;
+    [exs[exIdx - 1], exs[exIdx]] = [exs[exIdx], exs[exIdx - 1]];
+  }
+  function moveExerciseDown(mg, ssIdx, exIdx) {
+    const exs = buildState[mg][ssIdx].exs;
+    if (exIdx >= exs.length - 1) return;
+    [exs[exIdx], exs[exIdx + 1]] = [exs[exIdx + 1], exs[exIdx]];
+  }
+  function splitExercise(mg, ssIdx, exIdx) {
+    const ss = buildState[mg][ssIdx];
+    if (ss.exs.length <= 1) return; // isAlone — nothing meaningful to split
+    const ex = ss.exs.splice(exIdx, 1)[0];
+    // New singleton superset inserted directly below source. Origin 'normal':
+    // split-out singletons aren't placeholders, so they auto-delete on empty
+    // like any normal superset.
+    buildState[mg].splice(ssIdx + 1, 0, { exs: [ex], origin: 'normal' });
+  }
+  function mergeWithBelow(mg, ssIdx) {
+    const supersets = buildState[mg];
+    if (ssIdx >= supersets.length - 1) return; // isLastSS — nothing below
+    const source = supersets[ssIdx];
+    const target = supersets[ssIdx + 1];
+    // Locked-in decision (HANDOFF.md → "⤵ merge into origin:'new' placeholder
+    // keeps origin:'new'"): the + NEW SUPERSET placeholder slot is an explicit
+    // user choice and isn't erased by content arriving. If target carries 'new',
+    // the merged result retains 'new' so the empty-superset auto-delete exception
+    // (WE-15 / WE-57 side effect) still applies if all exercises are later removed.
+    source.origin = target.origin === 'new' ? 'new' : source.origin;
+    source.exs.push(...target.exs);
+    supersets.splice(ssIdx + 1, 1);
+  }
+
   function renderBuildExRow(mg, ssIdx, exIdx, ex, ss, isCardio) {
     const isFirst = exIdx === 0;
     const isLast = exIdx === ss.exs.length - 1;
@@ -785,12 +823,16 @@
     let html = '<div class="build-ex-row">';
     html += '<div class="build-ex-head">';
     html += `<span class="build-ex-name">${ex.name}</span>`;
-    // WE-58 cluster: ↑ ↓ ⤴ ⤵ ⊖ — step 1 wires only ⊖; ↑↓⤴⤵ are placeholders for step 2.
+    // WE-58 cluster: ↑↓ reorder within superset; ⤴ splits this exercise into a new
+    // singleton superset directly below; ⤵ merges this superset with the one below;
+    // ⊖ two-tap remove. ↑↓⤴⤵ dispatch via a single click handler in wireBuilderEvents
+    // keyed on data-move + data-mg/data-ss/data-ex coords. ⊖ has its own handler
+    // because it's a two-tap state machine.
     html += '<span class="action-cluster">';
-    html += `<button class="cluster-btn${isFirst ? ' disabled' : ''}" data-todo="move-up" title="move up">↑</button>`;
-    html += `<button class="cluster-btn${isLast ? ' disabled' : ''}" data-todo="move-down" title="move down">↓</button>`;
-    html += `<button class="cluster-btn${isAlone ? ' disabled' : ''}" data-todo="split" title="split into own superset">⤴</button>`;
-    html += `<button class="cluster-btn${isLastSS ? ' disabled' : ''}" data-todo="merge" title="merge with superset below">⤵</button>`;
+    html += `<button class="cluster-btn${isFirst ? ' disabled' : ''}" data-move="up" data-mg="${mg}" data-ss="${ssIdx}" data-ex="${exIdx}" title="move up within superset">↑</button>`;
+    html += `<button class="cluster-btn${isLast ? ' disabled' : ''}" data-move="down" data-mg="${mg}" data-ss="${ssIdx}" data-ex="${exIdx}" title="move down within superset">↓</button>`;
+    html += `<button class="cluster-btn${isAlone ? ' disabled' : ''}" data-move="split" data-mg="${mg}" data-ss="${ssIdx}" data-ex="${exIdx}" title="split into own superset below">⤴</button>`;
+    html += `<button class="cluster-btn${isLastSS ? ' disabled' : ''}" data-move="merge" data-mg="${mg}" data-ss="${ssIdx}" data-ex="${exIdx}" title="merge with superset below">⤵</button>`;
     html += `<button class="cluster-btn rm" data-rm data-mg="${mg}" data-ss="${ssIdx}" data-ex="${exIdx}" title="remove">⊖</button>`;
     html += '</span>';
     html += '</div>';
@@ -990,6 +1032,26 @@
           btn.textContent = 'REMOVE';
           expandedRemoveBtn = btn;
         }
+      });
+    });
+    // WE-58 move dispatcher (↑ ↓ ⤴ ⤵) — single handler for all four cluster moves.
+    // Each button carries data-move + data-mg/data-ss/data-ex coords; this routes to
+    // the matching helper and triggers a re-render. Tapping a move button also
+    // collapses any currently-expanded ⊖ (mutual exclusion within the cluster).
+    area.querySelectorAll('.cluster-btn[data-move]').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        if (btn.classList.contains('disabled')) return;
+        collapseExpandedRemove();
+        const move = btn.dataset.move;
+        const mg = btn.dataset.mg;
+        const ssIdx = parseInt(btn.dataset.ss);
+        const exIdx = parseInt(btn.dataset.ex);
+        if (move === 'up') moveExerciseUp(mg, ssIdx, exIdx);
+        else if (move === 'down') moveExerciseDown(mg, ssIdx, exIdx);
+        else if (move === 'split') splitExercise(mg, ssIdx, exIdx);
+        else if (move === 'merge') mergeWithBelow(mg, ssIdx);
+        updateSectionsArea();
       });
     });
   }

@@ -4,6 +4,17 @@ Chronological build log. Each rev = a deliverable in chat.
 
 ---
 
+## Phase 1B Rev 10 step 2 — within-section move logic — 2026-05-16
+**Status: committed locally, push pending**
+
+- WE-58: `↑`/`↓` reorder exercises within their containing superset. No cross-superset moves. First/last positions stay visually greyed (from step 1 scaffold) and the helpers defensively no-op at boundaries
+- WE-58: `⤴` splits the tapped exercise out into a new singleton superset inserted directly below the source. Disabled (`isAlone`) when the source has only one exercise — no meaningful split. New singleton gets `origin: 'normal'` so it auto-deletes on empty like any normal superset
+- WE-58: `⤵` merges the containing superset with the one directly below. Disabled on the last superset in a section. Result lives in the source slot; target slot is removed
+- Locked-in decision honored at the merge site: when target carries `origin: 'new'` (empty `+ NEW SUPERSET` placeholder), the merged result retains `'new'`, so the empty-superset auto-delete exception (WE-15 / WE-57 side effect) still applies if all exercises are later removed. Code comment at the merge site cites the HANDOFF.md "Locked-in decisions" entry
+- Single dispatcher in `wireBuilderEvents` keyed on `data-move=up|down|split|merge` + `data-mg/data-ss/data-ex` coords. Move taps also collapse any expanded `⊖` REMOVE (mutual exclusion within the cluster)
+- No `buildState` shape changes
+- HANDOFF.md updated: build-state marker, current-state, Active Rev plan (step 2 → DONE, NEXT advances to step 3 with phone-test review gate)
+
 ## Phase 1B Rev 10 step 1 — action cluster + two-tap remove — 2026-05-15
 **Status: committed locally, push pending**
 

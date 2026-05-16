@@ -7,10 +7,11 @@ editing code on a new machine. Update as part of every commit per WE-46.
 
 ## Last updated
 
-- **Build-state commit:** `acc51e6` — WE-57 two-tap remove + WE-58 action
-  cluster scaffold. Unchanged since.
-- **HANDOFF.md last edit:** 2026-05-16, ASUS session (sign-off protocol
-  codified in `CLAUDE.md` §7).
+- **Build-state commit:** Rev 10 step 2 (this commit) — WE-58 within-section
+  move logic (`↑ ↓ ⤴ ⤵`). Hash via `git log -1`; backfilled into the Active
+  Rev plan entry on the next commit.
+- **HANDOFF.md last edit:** 2026-05-16, ASUS session (same commit — Rev 10
+  step 2 ship).
 
 ---
 
@@ -34,8 +35,10 @@ In this order:
 Run before touching code. Expected output noted inline.
 
 ```
-git log --oneline -3
-# expect HEAD = acc51e6 (Rev 10 step 1); previous: 59aa97b, bc095cc
+git log --oneline -5
+# expect HEAD = Rev 10 step 2 commit, preceded by ff497c7 (sign-off
+# protocol codification), 88c62d7 (HANDOFF.md introduction), acc51e6
+# (Rev 10 step 1), 59aa97b (carryover log).
 
 git tag --list "we-v*"
 # expect: we-v1.1   (annotated tag on bc095cc per WE-42)
@@ -44,21 +47,22 @@ git status
 # expect: clean working tree on main, up to date with origin/main
 ```
 
-If any of the above is stale (HEAD ahead of `acc51e6`, tag missing,
-uncommitted work present), **stop and reconcile before starting step 2.**
+If any of the above is stale (HEAD behind the step 2 commit, tag missing,
+uncommitted work present), **stop and reconcile before starting step 3.**
 
 ---
 
 ## Current state
 
 - ✓ Phase 1 deployed via GitHub Pages (2026-05-15).
-- ⏳ **Phase 1B Rev 10 in progress.** Step 1 shipped in `acc51e6`
-  (WE-57 two-tap remove + WE-58 cluster scaffold; render-checked in browser,
-  approved as-is). **7 of 8 Rev 10 steps remain.**
+- ⏳ **Phase 1B Rev 10 in progress.** Steps 1 + 2 shipped. Step 1 in
+  `acc51e6` (WE-57 two-tap remove + WE-58 cluster scaffold). Step 2 in
+  this commit (WE-58 within-section move logic — `↑ ↓ ⤴ ⤵` wired through a
+  single dispatcher; `mergeWithBelow` honors the locked-in `origin:'new'`
+  preservation rule). **6 of 8 Rev 10 steps remain.**
 - `we-v1.1` annotated tag landed retroactively on `bc095cc` (Phase 1 deploy
   point per WE-42).
-- No code pushed to `origin` since `acc51e6`. Local-only state on each
-  machine is the HANDOFF.md scaffold commit (this one).
+- Local `main` is one commit ahead of `origin/main` until the step 2 push.
 
 ---
 
@@ -68,8 +72,9 @@ Locked in prior session. Do not reorder without explicit OK.
 
 1. ✓ **WE-58 cluster + WE-57 two-tap remove + side effects** — DONE
    (`acc51e6`).
-2. ⏭️ **NEXT — WE-58 within-section move logic** (`↑ ↓ ⤴ ⤵`).
-3. ☐ WE-59 primary-group tag (off-section, grey italic mono).
+2. ✓ **WE-58 within-section move logic** (`↑ ↓ ⤴ ⤵`) — DONE (this commit;
+   `git log -1` for hash, backfilled into this entry on the next commit).
+3. ⏭️ **NEXT — WE-59 primary-group tag** (off-section, grey italic mono).
    **STOP HERE for phone-test review gate.**
 4. ☐ WE-60 + WE-61 save buttons (in-memory; no Dexie until Phase 3).
 5. ☐ WE-62 Saved Library screen.
@@ -81,19 +86,20 @@ Locked in prior session. Do not reorder without explicit OK.
 
 ## Next step
 
-**Step 2 — WE-58 within-section move logic.**
+**Step 3 — WE-59 primary-group tag.** STOP HERE for phone-test review gate.
 
-Implementation plan (settled in prior session):
+Scope (per CHANGELOG / OUTSTANDING_ITEMS):
 
-- Replace `data-todo` placeholders on `↑ ↓ ⤴ ⤵` (currently at
-  `index.html:790-793`) with `data-move=` attrs carrying superset and
-  exercise coords.
-- Add helpers: `moveUp`, `moveDown`, `splitExercise`, `mergeWithBelow`.
-- Single dispatcher in `wireBuilderEvents` (currently at
-  `index.html:895`).
-- **No `buildState` shape changes needed for step 2.**
-- See Locked-in decisions below for the `⤵` merge-into-`origin:'new'` edge
-  case — document the rationale at the merge site with a code comment.
+- Render a grey italic mono text tag adjacent to exercise name when the
+  exercise's primary muscle group ≠ the section it appears in.
+- Show in Builder, Workout, History, and Exercise Detail contexts.
+- Requires per-exercise primary-group metadata. Phase 1B placeholder
+  approach: hardcode primary group on the few demo exercises currently in
+  `shadowData` + `workoutPlan`. Full library tagging is Phase 2.
+- No `buildState` shape changes expected; the tag is a render concern.
+
+Phone-test gate after step 3: verify cluster + move + tag interactions on
+iPhone before continuing to step 4.
 
 ---
 
