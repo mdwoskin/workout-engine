@@ -4,6 +4,16 @@ Chronological build log. Each rev = a deliverable in chat.
 
 ---
 
+## Phase 1B Rev 10 step 4 — save buttons (in-memory) — 2026-05-16
+**Status: committed locally, push pending**
+
+- WE-60: `+ SAVE WORKOUT` full-width block button at the bottom of `#sections-area`. Renders only when `buildState` contains ≥1 exercise across the selected sections (no point saving empty). On click: prompts for a name with default `Custom Workout #N`; cancel aborts, empty/whitespace falls back to the default. Walks `buildState`, drops empty placeholder supersets, copies only `{ name, primary }` per exercise (structure-only per WE-60), pushes onto in-memory `savedWorkouts`, toasts
+- WE-61: small `+ SAVE SUPERSET` inline button at the bottom of each non-empty superset card. Omitted on cardio (cardio isn't a typical superset structure for save/reuse) and on `+ NEW SUPERSET` empty placeholders. On click: same naming flow as Save Workout; copies the superset's exercises to `{ name, primary }`, captures `sectionMg`, pushes onto in-memory `savedSupersets`, toasts
+- Naming: Phase 1B placeholder. WE-63 (step 6) will replace the default string with the proper `Custom [GROUP] [Type] #N` auto-name; the `prompt()` mechanic stays
+- New CSS class `.save-superset-btn` — 24px tall, 10px font, sized smaller than the default `.btn.sm` to fit subtly under the superset's exercise rows
+- No `buildState` shape changes — saved templates are a separate in-memory data model. No Dexie wiring (Phase 3). No Saved Library screen yet (WE-62, step 5) — saves are write-only until the screen lands
+- HANDOFF.md updated: step 4 marked DONE, NEXT advances to step 5 (WE-62 Saved Library)
+
 ## Phase 1B Rev 10 step 3 — primary-group tag (Builder) — 2026-05-16
 **Status: committed locally, push pending**
 

@@ -188,6 +188,8 @@
   .build-ex-name { font-family: 'Inter Tight', sans-serif; font-size: 12px; font-weight: 500; color: var(--text); flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   /* WE-59: primary-group tag — adjacent to ex name when primary ≠ section. Grey italic mono. */
   .primary-tag { font-family: 'JetBrains Mono', monospace; font-style: italic; font-size: 10px; font-weight: 400; color: var(--text-faint); flex-shrink: 0; white-space: nowrap; }
+  /* WE-61: small inline save-superset button at the bottom of each superset card */
+  .save-superset-btn { height: 24px; font-size: 10px; padding: 0 10px; margin-top: 6px; }
   .action-cluster { display: inline-flex; align-items: center; gap: 3px; flex-shrink: 0; }
   .cluster-btn { width: 24px; height: 24px; padding: 0; background: var(--bg-2); border: 1px solid var(--border-hi); color: var(--text-dim); border-radius: 4px; font-family: 'JetBrains Mono', monospace; font-size: 12px; line-height: 1; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; }
   .cluster-btn:active { background: var(--bg-3); }
@@ -755,6 +757,18 @@
   // Keyed by muscle group; Set of recommendation indices that have been pulled
   const pulledRecs = {};
 
+  // ===== WE-60 / WE-61 saved templates (Phase 1B in-memory) =====
+  // Structure only — no weights/reps, just the exercise identity per WE-60.
+  // Phase 1B placeholder: held in JS memory; cleared on reload. Phase 3 (Dexie)
+  // wires the saved_workouts / saved_supersets stores from WE-34.
+  // Names default to "Custom Workout #N" / "Custom Superset #N" via the save
+  // prompt; user edits inline. WE-63 (step 6) replaces the default with the
+  // full auto-name format `Custom [GROUP] [Type] #N`.
+  const savedWorkouts = [];     // [{ id, name, savedAt, sections: { [mg]: [{ exs }] } }]
+  const savedSupersets = [];    // [{ id, name, savedAt, sectionMg, exs }]
+  let savedWorkoutSeq = 1;      // next #N for the workout auto-name stub
+  let savedSupersetSeq = 1;     // next #N for the superset auto-name stub
+
   function ensureBuildState() {
     Array.from(selectedMG).forEach(mg => {
       if (!buildState[mg]) buildState[mg] = []; // empty by default
@@ -909,6 +923,11 @@
             ss.exs.forEach((ex, exIdx) => {
               html += renderBuildExRow(mg, ssIdx, exIdx, ex, ss, isCardio);
             });
+            // WE-61: save-superset on non-empty, non-cardio supersets.
+            // (Cardio omitted — cardio isn't a typical superset structure for save/reuse.)
+            if (!isCardio) {
+              html += `<button class="btn sm save-superset-btn" data-save-superset="${mg}-${ssIdx}">+ SAVE SUPERSET</button>`;
+            }
           }
           html += wrapClose;
         });
@@ -950,6 +969,15 @@
 
       html += `</div></div></div>`; // /section-body /section /wrap
     });
+    // WE-60: Save Workout button — only renders when the current build has at least
+    // one exercise across all selected sections. Walks the same buildState as the
+    // save handler does, so visibility and saved-state stay aligned.
+    const hasAnyExercise = Object.values(buildState).some(supersets =>
+      supersets.some(ss => ss.exs.length > 0)
+    );
+    if (hasAnyExercise) {
+      html += `<button class="btn sm block" data-save-workout style="margin-top: 14px;">+ SAVE WORKOUT</button>`;
+    }
     area.innerHTML = html;
     wireBuilderEvents(area);
   }
@@ -1052,6 +1080,54 @@
           btn.textContent = 'REMOVE';
           expandedRemoveBtn = btn;
         }
+      });
+    });
+    // WE-60: Save Workout — copy buildState (structure only — no weights/reps/origins)
+    // into savedWorkouts. Default name is "Custom Workout #N"; user can edit in the
+    // prompt. Cancel aborts; empty/whitespace falls back to the default. Empty
+    // placeholder supersets are dropped from the saved structure.
+    area.querySelectorAll('[data-save-workout]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const defaultName = `Custom Workout #${savedWorkoutSeq}`;
+        const input = prompt('Name this workout:', defaultName);
+        if (input === null) return;
+        const name = input.trim() || defaultName;
+        const sections = {};
+        Array.from(selectedMG).forEach(mg => {
+          const supersets = (buildState[mg] || []).filter(ss => ss.exs.length > 0);
+          if (supersets.length > 0) {
+            sections[mg] = supersets.map(ss => ({
+              exs: ss.exs.map(ex => ({ name: ex.name, primary: ex.primary }))
+            }));
+          }
+        });
+        savedWorkouts.push({ id: savedWorkoutSeq, name, savedAt: new Date().toISOString(), sections });
+        savedWorkoutSeq++;
+        toast(`Saved workout: ${name}`);
+      });
+    });
+    // WE-61: Save Superset — copy a single superset's exercises (structure only)
+    // into savedSupersets. Same naming behavior as Save Workout.
+    area.querySelectorAll('[data-save-superset]').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const [mg, ssIdxStr] = btn.getAttribute('data-save-superset').split('-');
+        const ssIdx = parseInt(ssIdxStr);
+        const ss = buildState[mg] && buildState[mg][ssIdx];
+        if (!ss || ss.exs.length === 0) return;
+        const defaultName = `Custom Superset #${savedSupersetSeq}`;
+        const input = prompt('Name this superset:', defaultName);
+        if (input === null) return;
+        const name = input.trim() || defaultName;
+        savedSupersets.push({
+          id: savedSupersetSeq,
+          name,
+          savedAt: new Date().toISOString(),
+          sectionMg: mg,
+          exs: ss.exs.map(ex => ({ name: ex.name, primary: ex.primary }))
+        });
+        savedSupersetSeq++;
+        toast(`Saved superset: ${name}`);
       });
     });
     // WE-58 move dispatcher (↑ ↓ ⤴ ⤵) — single handler for all four cluster moves.

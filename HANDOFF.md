@@ -7,12 +7,11 @@ editing code on a new machine. Update as part of every commit per WE-46.
 
 ## Last updated
 
-- **Build-state commit:** `ec6bcb4` — Rev 10 step 3 (WE-59 primary-group
-  tag, Builder only). Unchanged since.
-- **HANDOFF.md last edit:** 2026-05-16, ASUS session (Rev 10 step 3
-  sign-off bookkeeping — 1 item parked to OUTSTANDING_ITEMS, 7 kept; new
-  modal-Done concern raised at phone-test and folded into the Phase 2
-  task list; step 3 hash backfilled into Active Rev plan).
+- **Build-state commit:** Rev 10 step 4 (this commit) — WE-60 + WE-61 save
+  buttons (in-memory, structure-only). Hash via `git log -1`; backfilled
+  into the Active Rev plan entry on the next commit.
+- **HANDOFF.md last edit:** 2026-05-16, ASUS session (same commit — Rev 10
+  step 4 ship).
 
 ---
 
@@ -36,8 +35,9 @@ In this order:
 Run before touching code. Expected output noted inline.
 
 ```
-git log --oneline -6
-# expect HEAD = Rev 10 step 3 commit, preceded by 6cb5f73 (step 2
+git log --oneline -8
+# expect HEAD = Rev 10 step 4 commit, preceded by 07a2fe6 (step 3
+# sign-off bookkeeping), ec6bcb4 (Rev 10 step 3), 6cb5f73 (step 2
 # sign-off bookkeeping), 35a0031 (Rev 10 step 2), ff497c7 (sign-off
 # protocol codification), 88c62d7 (HANDOFF.md introduction), acc51e6
 # (Rev 10 step 1).
@@ -49,24 +49,24 @@ git status
 # expect: clean working tree on main, up to date with origin/main
 ```
 
-If any of the above is stale (HEAD behind the step 3 commit, tag missing,
-uncommitted work present), **stop and reconcile before starting step 4.**
+If any of the above is stale (HEAD behind the step 4 commit, tag missing,
+uncommitted work present), **stop and reconcile before starting step 5.**
 
 ---
 
 ## Current state
 
 - ✓ Phase 1 deployed via GitHub Pages (2026-05-15).
-- ⏳ **Phase 1B Rev 10 in progress.** Steps 1 + 2 + 3 shipped. Step 1
-  (`acc51e6`): WE-57 two-tap remove + WE-58 cluster scaffold. Step 2
-  (`35a0031`): WE-58 within-section move logic. Step 3 (this commit):
-  WE-59 primary-group tag — Builder Build area + Rec area only. Workout /
-  History / Exercise Detail expansion deferred to Phase 5/6. **5 of 8
-  Rev 10 steps remain.**
+- ⏳ **Phase 1B Rev 10 in progress.** Steps 1–4 shipped. Step 1
+  (`acc51e6`): WE-57 + WE-58 cluster scaffold. Step 2 (`35a0031`): WE-58
+  within-section move logic. Step 3 (`ec6bcb4`): WE-59 primary-group tag
+  (Builder only). Step 4 (this commit): WE-60 + WE-61 save buttons —
+  in-memory `savedWorkouts` / `savedSupersets`; structure-only;
+  `prompt()` for name with auto-stub default. **4 of 8 Rev 10 steps
+  remain.**
 - `we-v1.1` annotated tag landed retroactively on `bc095cc` (Phase 1 deploy
   point per WE-42).
-- Local `main` is multiple commits ahead of `origin/main` until the step 2
-  + step 3 push.
+- Local `main` is one commit ahead of `origin/main` until the step 4 push.
 
 ---
 
@@ -88,9 +88,14 @@ Locked in prior session. Do not reorder without explicit OK.
    kept as-is. New concern from phone test folded into Phase 2 task
    list: `+ ADD EXERCISE` modal needs its Done action wired to
    `buildState`, plus a larger demo library to exercise WE-59 properly.
-4. ⏭️ **NEXT — WE-60 + WE-61 save buttons** (in-memory; no Dexie until
-   Phase 3).
-5. ☐ WE-62 Saved Library screen.
+4. ✓ **WE-60 + WE-61 save buttons** (in-memory; no Dexie until Phase 3) —
+   DONE (this commit; `git log -1` for hash, backfilled on the next
+   commit). `+ SAVE WORKOUT` block button at bottom of Builder when
+   build is non-empty; `+ SAVE SUPERSET` small inline button at the
+   bottom of each non-empty, non-cardio superset. `prompt()` with
+   auto-stub default name; cancel aborts; empty/whitespace falls back to
+   default.
+5. ⏭️ **NEXT — WE-62 Saved Library screen.**
 6. ☐ WE-63 auto-name logic.
 7. ☐ CHANGELOG + CLAUDE.md updates; tag `we-v1.2`.
 8. ☐ Push + verify GH Pages deploy.
@@ -99,27 +104,33 @@ Locked in prior session. Do not reorder without explicit OK.
 
 ## Next step
 
-**Step 4 — WE-60 + WE-61 save buttons (in-memory; no Dexie until Phase 3).**
+**Step 5 — WE-62 Saved Library screen.**
 
 Scope (per CHANGELOG v1.3 entry + OUTSTANDING_ITEMS):
 
-- **WE-60:** "Save Workout" button in the Builder action bar (placement
-  TBD — near the existing per-section `+ ADD EXERCISE` row or at the
-  Builder screen header). Captures the current multi-section build into
-  an in-memory `savedWorkouts` array. Structure only — no weights/reps,
-  just the exercise structure per WE-60.
-- **WE-61:** "Save Superset" button at the bottom of each superset card.
-  Captures that superset's exercise structure into an in-memory
-  `savedSupersets` array. Structure only.
-- No Dexie/IndexedDB wiring yet (Phase 3). No Saved Library screen yet
-  (WE-62, step 5). No auto-name logic yet (WE-63, step 6) — temporary
-  names from `prompt()` or a hardcoded "Saved at HH:MM" stub.
-- Toast confirmation on save.
-- No `buildState` shape changes.
+- New screen reachable from Home `📋 Saved templates` and Builder
+  `📋 INSERT SAVED SUPERSET` buttons (entry points need to be added to
+  Home / Builder if not present yet).
+- WORKOUTS / SUPERSETS toggle at the top — flips the list between
+  `savedWorkouts` and `savedSupersets`.
+- Cards per saved entry: name, structure preview (exercise names in
+  order, grouped by section for workouts), savedAt date, use count
+  (placeholder — increments when WE-62's `▶ Use` action lands), `▶ Use`
+  and `✕ Delete` actions.
+  - `▶ Use` on a saved workout: load its structure into `buildState`
+    via the same data shapes used in `+ Pull in`. Switches to Builder.
+  - `▶ Use` on a saved superset: only available from the Builder's
+    `📋 INSERT SAVED SUPERSET` entry point; injects the superset into
+    the active section.
+  - `✕ Delete`: remove from the in-memory array; toast confirm.
+- Sort by `savedAt` desc (most recent first), per the rules-doc note
+  about `last_used_at` once that exists.
+- Empty-state message when the relevant array is empty.
+- Phase 1B: still in-memory; no Dexie. State clears on reload.
 
-Phone-test review gate at step 3 (already passed by the time step 4
-starts) — step 4 is mechanical UI scaffolding, no new gate required
-until WE-62 lands in step 5 (Saved Library screen needs visual review).
+Phone-test review gate at step 5 — new screen lands; visual treatment
+needs phone verification before continuing to step 6 (WE-63 auto-name
+logic).
 
 ---
 

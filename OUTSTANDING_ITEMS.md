@@ -12,8 +12,8 @@ Starting point: current `index.html` (Phase 1 Rev 9). Apply these deltas:
 - ~~**Two-tap remove** (WE-57)~~ — shipped in Rev 10 step 1.
 - ~~**Move buttons** (WE-58): cluster scaffold + `⊖` shipped in step 1 (`acc51e6`); `↑ ↓ ⤴ ⤵` move logic shipped in step 2 (`35a0031`).~~ Visual/behavioral refinements parked — see "Parked from 2026-05-16 Rev 10 step 2 sign-off" section below.
 - ~~**Primary-group tag** (WE-59): grey italic mono text adjacent to exercise name when primary group ≠ section. Builder Build area + Rec area shipped in step 3.~~ **Workout / History / Exercise Detail expansion deferred** — those screens lack section-context data; placeholder shims would be thrown away when Phase 5/6 wire real plumbing. Will land naturally with those phases.
-- **Save Workout button** in Builder action bar (WE-60). Structure only.
-- **Save Superset button** at bottom of each superset card (WE-61). Structure only.
+- ~~**Save Workout button** in Builder action bar (WE-60). Structure only.~~ Shipped in step 4 — `+ SAVE WORKOUT` at the bottom of `#sections-area` when build is non-empty; structure-only; `prompt()` with auto-stub default.
+- ~~**Save Superset button** at bottom of each superset card (WE-61). Structure only.~~ Shipped in step 4 — small `+ SAVE SUPERSET` inline button per non-empty, non-cardio superset; same naming flow.
 - **Saved Library screen** (WE-62): accessible from Home `📋 Saved templates` and Builder `📋 INSERT SAVED SUPERSET` buttons. WORKOUTS/SUPERSETS toggle. Cards with name, preview, dates, use count, `▶ Use` and `✕ Delete`.
 - **Auto-name logic** (WE-63): `Custom [GROUP] [Type] #N`; multi-group workouts join with `/`; supersets use section context; "lowest available N" rule via `is_auto_named` flag.
 - ~~**Side effects** (WE-15, WE-57, WE-58)~~ — shipped in step 1 (empty-superset auto-delete + pulled-rec re-enable).
