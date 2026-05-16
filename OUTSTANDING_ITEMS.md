@@ -19,9 +19,10 @@ Starting point: current `index.html` (Phase 1 Rev 9). Apply these deltas:
 - ~~**Side effects** (WE-15, WE-57, WE-58)~~ — shipped in step 1 (empty-superset auto-delete + pulled-rec re-enable).
 
 ### 2. Phase 2: Exercise library + filter wiring
-- Hardcode library from cleaned Excel Control sheet
+- Hardcode library from cleaned Excel Control sheet — enough entries to exercise WE-59 across multiple off-section cases (surfaced during 2026-05-16 step 3 phone test)
 - Fix `Goblet Spuat` → `Goblet Squat`
 - Wire picker filter (per WE-31): `This section only` vs `Show all` toggle
+- **Wire the `+ ADD EXERCISE` modal's Done action to push selected exercises into `buildState`.** Currently the modal opens but doesn't update the Build area on Done — surfaced during 2026-05-16 step 3 phone test. WE-59 visual verification is bottlenecked until this works
 - Tag each exercise with primary muscle group for WE-59 tag rendering
 
 ### 3. Phase 3: IndexedDB initialization
@@ -83,6 +84,20 @@ Per CLAUDE.md §7 (d) park disposition.
    placeholder, (b) later remove all exercises, (c) confirm placeholder
    card persists) hasn't been behaviorally tested. **Trigger:** test
    when picker enables build-up + tear-down of a merged `'new'` superset.
+
+## Parked from 2026-05-16 Rev 10 step 3 sign-off
+
+1. **WE-59 tag position — should sit immediately after the exercise name
+   text, not at the right edge of the name's flex container.** Current
+   implementation places the tag after `.build-ex-name` / `.rec-name`,
+   but the `flex: 1` on those name spans expands them to fill available
+   space, pushing the tag to the right edge — adjacent to the action
+   cluster (Build) or `sets×reps` meta (Rec) instead of tight to the
+   name text. **Fix sketch:** wrap `[name + tag]` in a `flex: 1` parent
+   with the tag at `flex-shrink: 0` and the name itself shrinking with
+   ellipsis. **Trigger:** address when Builder visual polish lands, or
+   fold into the WE-59 expansion in Phase 5/6 (Workout / History /
+   Exercise Detail), or sooner if it grates during ongoing phone tests.
 
 ## Open nuances (not deeply resolved)
 

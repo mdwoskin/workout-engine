@@ -7,11 +7,12 @@ editing code on a new machine. Update as part of every commit per WE-46.
 
 ## Last updated
 
-- **Build-state commit:** Rev 10 step 3 (this commit) — WE-59 primary-group
-  tag (Builder only). Hash via `git log -1`; backfilled into the Active
-  Rev plan entry on the next commit.
-- **HANDOFF.md last edit:** 2026-05-16, ASUS session (same commit — Rev 10
-  step 3 ship).
+- **Build-state commit:** `ec6bcb4` — Rev 10 step 3 (WE-59 primary-group
+  tag, Builder only). Unchanged since.
+- **HANDOFF.md last edit:** 2026-05-16, ASUS session (Rev 10 step 3
+  sign-off bookkeeping — 1 item parked to OUTSTANDING_ITEMS, 7 kept; new
+  modal-Done concern raised at phone-test and folded into the Phase 2
+  task list; step 3 hash backfilled into Active Rev plan).
 
 ---
 
@@ -79,11 +80,14 @@ Locked in prior session. Do not reorder without explicit OK.
    Sign-off 2026-05-16: 5 items parked to OUTSTANDING_ITEMS.md
    ("Parked from 2026-05-16 Rev 10 step 2 sign-off" section), 3 kept
    as-is.
-3. ✓ **WE-59 primary-group tag** — DONE (this commit; `git log -1` for
-   hash, backfilled on the next commit). **Builder only** (Build area +
-   Rec area). Workout / History / Exercise Detail expansion deferred to
-   Phase 5/6 — logged in OUTSTANDING_ITEMS. Phone-test review gate fires
-   on this step.
+3. ✓ **WE-59 primary-group tag** — DONE (`ec6bcb4`). **Builder only**
+   (Build area + Rec area). Workout / History / Exercise Detail
+   expansion deferred to Phase 5/6 (in OUTSTANDING_ITEMS). Sign-off
+   2026-05-16: 1 item parked (tag position — `flex: 1` on name spans
+   pushes tag to the right edge instead of adjacent to name text), 7
+   kept as-is. New concern from phone test folded into Phase 2 task
+   list: `+ ADD EXERCISE` modal needs its Done action wired to
+   `buildState`, plus a larger demo library to exercise WE-59 properly.
 4. ⏭️ **NEXT — WE-60 + WE-61 save buttons** (in-memory; no Dexie until
    Phase 3).
 5. ☐ WE-62 Saved Library screen.
