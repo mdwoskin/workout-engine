@@ -118,3 +118,41 @@ Update this section as phases complete.
   persistence.** Project context belongs in `CLAUDE.md` — versioned, portable,
   reviewable. Local-only hidden memory doesn't survive cloning and isn't
   auditable.
+
+---
+
+## 7. Sign-off protocol
+
+After each commit, the status report includes a **Sign-off** subsection
+listing every meaningful built item from that commit. This is the gate at
+which the user decides what to keep, revise, remove, or park.
+
+- **What counts as an item.** Anything the user might plausibly want to
+  revisit — behavioral, visual, structural. NOT internal helpers, renames,
+  typos, or other plumbing. Err toward over-surfacing; the user will say
+  if granularity drifts into trivia.
+- **The four dispositions, per item:**
+  - **(a) keep** — approve as-built; no action.
+  - **(b) revise** — redo before push, as a follow-up commit in the same
+    Rev. New commit, not `git commit --amend`, per Claude Code's git
+    safety default; override with "amend" only if the user specifically
+    wants clean single-commit history.
+  - **(c) remove** — back out via follow-up commit.
+  - **(d) park** — approve as-built AND log a future-revision note in
+    `OUTSTANDING_ITEMS.md`. Use for "I like this but want to revisit it
+    later" reactions.
+- **Default per item, if user doesn't reply** = (a) keep. The user can
+  blanket-approve ("(a) all") or pick selectively ("(a) 1–3, (d) 4 — log
+  the button styling note, (b) 5").
+- **Commit body lists items in the order they'll be prompted.** The
+  status-report sign-off list mirrors the commit body, so no
+  cross-referencing is needed.
+- **`OUTSTANDING_ITEMS.md` vs. the (d) park disposition.**
+  `OUTSTANDING_ITEMS.md` is the parking lot for *new* ideas raised during
+  a build. The (d) park disposition is for *items shipped in the current
+  commit* that warrant a future revisit. Mechanically both land in
+  `OUTSTANDING_ITEMS.md`; the distinction is provenance.
+- **Mid-build feedback (rare).** If the user raises an item while a step
+  is mid-flight: default is to finish the current step, commit, then run
+  the sign-off. Break early only if continuing would clearly waste work —
+  and ask first, don't unilaterally pivot.

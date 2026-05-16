@@ -7,9 +7,10 @@ editing code on a new machine. Update as part of every commit per WE-46.
 
 ## Last updated
 
-- **Commit:** `acc51e6` — WE-57 two-tap remove + WE-58 action cluster scaffold
-- **Timestamp:** 2026-05-16
-- **Updated by:** ASUS session (handoff scaffold; no code changes)
+- **Build-state commit:** `acc51e6` — WE-57 two-tap remove + WE-58 action
+  cluster scaffold. Unchanged since.
+- **HANDOFF.md last edit:** 2026-05-16, ASUS session (sign-off protocol
+  codified in `CLAUDE.md` §7).
 
 ---
 
@@ -136,6 +137,10 @@ decisions it governs.
 - **After each commit, pause and give a short status report** (files
   touched, line counts, syntax check, proposed scope for next step). Wait
   for "go" before starting the next step.
+- **Run the sign-off protocol** at every status report — see `CLAUDE.md`
+  §7. Each meaningful built item gets a (a) keep / (b) revise / (c)
+  remove / (d) park disposition. The commit body lists items in the order
+  they'll be prompted.
 - **Stop at step 3 for phone-test review.**
 - **Don't push to `main` without explicit OK.** Pushes go live on GH Pages
   within ~1 minute.
