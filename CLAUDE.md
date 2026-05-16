@@ -67,6 +67,7 @@ These rules govern every change. Read the full text in
 | `index.html` | committed | **Current code.** Phase 1 Rev 9 visual prototype. Single source of truth for what works today. |
 | `CHANGELOG.md` | committed | One entry per iteration per WE-46. Append top entries; don't edit historical ones. |
 | `OUTSTANDING_ITEMS.md` | committed | Live working list. Open questions, deferred items, spec hygiene. Items resolve individually; not aged out wholesale. |
+| `HANDOFF.md` | committed | **Cross-machine handoff state.** Last commit, verification commands, current Rev plan, next step, locked-in decisions, per-machine gotchas. Read first on a new machine. Update per commit per WE-46. |
 | `.gitignore` | committed | OS/editor artifacts only. v1 has no node_modules. |
 | `CLAUDE.md` | committed | This file. |
 
@@ -80,7 +81,7 @@ Per WE-40:
 
 - ✓ **Phase 0** — Rules Doc v1.3
 - ✓ **Phase 1** — Visual prototype, Rev 1–9 (deployed 2026-05-15)
-- ⏳ **Phase 1B** — Rev 10 build (spec'd in WE-57 through WE-63; not yet coded)
+- ⏳ **Phase 1B** — Rev 10 build (spec'd in WE-57 through WE-63). Step 1 of 8 shipped in `acc51e6` (WE-57 two-tap remove + WE-58 cluster scaffold); 7 steps remain. See `HANDOFF.md` for the live plan.
 - ☐ Phase 2 — Exercise library + filter
 - ☐ Phase 3 — IndexedDB schema + seed
 - ☐ Phase 4 — Shadow population + history queries
