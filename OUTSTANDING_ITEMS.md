@@ -10,7 +10,7 @@ Rev 10 spec is captured in WE-57 through WE-63 of `Workout_Engine_Rules_v1.3.md`
 Starting point: current `index.html` (Phase 1 Rev 9). Apply these deltas:
 
 - ~~**Two-tap remove** (WE-57)~~ — shipped in Rev 10 step 1.
-- **Move buttons** (WE-58): cluster scaffold (`↑ ↓ ⤴ ⤵` plus `⊖`) shipped in step 1; **move logic pending in step 2**.
+- ~~**Move buttons** (WE-58): cluster scaffold + `⊖` shipped in step 1 (`acc51e6`); `↑ ↓ ⤴ ⤵` move logic shipped in step 2 (`35a0031`).~~ Visual/behavioral refinements parked — see "Parked from 2026-05-16 Rev 10 step 2 sign-off" section below.
 - **Primary-group tag** (WE-59): grey italic mono text adjacent to exercise name when primary group ≠ section. Show in Builder, Workout, History, ExerciseDetail.
 - **Save Workout button** in Builder action bar (WE-60). Structure only.
 - **Save Superset button** at bottom of each superset card (WE-61). Structure only.
@@ -45,6 +45,44 @@ Starting point: current `index.html` (Phase 1 Rev 9). Apply these deltas:
 2. **`gh` CLI PATH gotcha (deploy-session machine only).** Installed at `C:\Program Files\GitHub CLI\gh.exe`. Not on Bash PATH in the deploy-session shell; PowerShell needed `& "..."` call operator. Fresh shell may pick up the system PATH update — test first. Auth persists in OS keyring; no re-login expected. Surface Pro 7 (current build env) presumed clean until proven otherwise.
 3. **Section 1 above is a working checklist, not archival.** As Rev 10 deltas (WE-57–WE-63) ship, strike them rather than check them in place. When all 8 ship, the section collapses to one line or disappears.
 4. **WE-N citation discipline.** The handoff that mis-cited WE-29 for the 15-iteration rule (actually in the unnumbered Versioning Protocol preamble) is logged. Folding into v1.4 spec hygiene; tracked below — no further action now.
+
+## Parked from 2026-05-16 Rev 10 step 2 sign-off
+
+Items parked at step 2 sign-off, each with a trigger for when to revisit.
+Per CLAUDE.md §7 (d) park disposition.
+
+1. **`↑`/`↓` reorder — verify with 3+ exercise supersets.** Step 2 ships
+   against 1–2 ex supersets only (current demo data). **Trigger:**
+   revisit when Phase 2 add-exercise picker is wired and 3+ ex
+   supersets are constructable.
+
+2. **`⤴` split position — currently inserts singleton DIRECTLY BELOW
+   source.** Plan didn't fix direction; "below" pairs symmetrically with
+   `⤵` ("both ops act on the boundary below this superset"). Alternative
+   was "above" (closer to the literal ↑-arrow direction). **Trigger:**
+   revisit with 3+ ex supersets in the UI to observe whether "below"
+   feels right when splitting first/middle/last exercises.
+
+3. **`⤴` split origin — currently `'normal'` regardless of source.**
+   Rationale: splits don't involve `+ NEW SUPERSET`, so the singleton
+   isn't a reserved placeholder. Alternative was inherit-from-source
+   (matters only when splitting out of a merged `origin:'new'` superset).
+   **Trigger:** revisit when the merge-into-`'new'` path is exercisable
+   end-to-end and a split out of that state can be tested.
+
+4. **`⤵` merge anchor — result-in-source-slot, target removed.** User
+   anchored on source (tapped `⤵` there); source slot survives to
+   minimize apparent movement. Alternative was result-in-target-slot
+   (merged group appears to "move down"). **Trigger:** revisit with
+   multi-superset merge testable end-to-end in the UI.
+
+5. **`⤵` merge-into-`'new'` origin preservation — needs end-to-end
+   verification.** Implemented per the HANDOFF.md locked-in decision and
+   the WE-15 / WE-57 auto-delete exception is in place from step 1, but
+   the full lifecycle ((a) merge content into `+ NEW SUPERSET`
+   placeholder, (b) later remove all exercises, (c) confirm placeholder
+   card persists) hasn't been behaviorally tested. **Trigger:** test
+   when picker enables build-up + tear-down of a merged `'new'` superset.
 
 ## Open nuances (not deeply resolved)
 

@@ -7,11 +7,11 @@ editing code on a new machine. Update as part of every commit per WE-46.
 
 ## Last updated
 
-- **Build-state commit:** Rev 10 step 2 (this commit) — WE-58 within-section
-  move logic (`↑ ↓ ⤴ ⤵`). Hash via `git log -1`; backfilled into the Active
-  Rev plan entry on the next commit.
-- **HANDOFF.md last edit:** 2026-05-16, ASUS session (same commit — Rev 10
-  step 2 ship).
+- **Build-state commit:** `35a0031` — Rev 10 step 2 (WE-58 within-section
+  move logic, `↑ ↓ ⤴ ⤵`). Unchanged since.
+- **HANDOFF.md last edit:** 2026-05-16, ASUS session (Rev 10 step 2
+  sign-off bookkeeping — 5 items parked to OUTSTANDING_ITEMS.md, 3 kept;
+  step 2 hash backfilled into Active Rev plan).
 
 ---
 
@@ -72,8 +72,10 @@ Locked in prior session. Do not reorder without explicit OK.
 
 1. ✓ **WE-58 cluster + WE-57 two-tap remove + side effects** — DONE
    (`acc51e6`).
-2. ✓ **WE-58 within-section move logic** (`↑ ↓ ⤴ ⤵`) — DONE (this commit;
-   `git log -1` for hash, backfilled into this entry on the next commit).
+2. ✓ **WE-58 within-section move logic** (`↑ ↓ ⤴ ⤵`) — DONE (`35a0031`).
+   Sign-off 2026-05-16: 5 items parked to OUTSTANDING_ITEMS.md
+   ("Parked from 2026-05-16 Rev 10 step 2 sign-off" section), 3 kept
+   as-is.
 3. ⏭️ **NEXT — WE-59 primary-group tag** (off-section, grey italic mono).
    **STOP HERE for phone-test review gate.**
 4. ☐ WE-60 + WE-61 save buttons (in-memory; no Dexie until Phase 3).
