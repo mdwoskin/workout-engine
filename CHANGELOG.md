@@ -4,6 +4,17 @@ Chronological build log. Each rev = a deliverable in chat.
 
 ---
 
+## Phase 1B Rev 10 step 3 — primary-group tag (Builder) — 2026-05-16
+**Status: committed locally, push pending**
+
+- WE-59: small grey-italic-mono tag renders adjacent to exercise name in the Builder when `ex.primary !== section`. Helper `primaryTag(exPrimary, sectionMg)` returns empty when on-section, emits a single `<span class="primary-tag">` otherwise
+- Wired in Builder Build area (`renderBuildExRow`) and Builder Rec area (`rec-row` render). Position: immediately after the name span; flex layout puts it adjacent to the name with the existing 6px parent gap before the action cluster
+- **Phase 1B scope:** Builder only. Workout Mode / History / Exercise Detail tag expansion deferred — those screens lack section-context data and would need Phase-1B shims that get thrown away when Phase 5/6 wire real plumbing. Logged in OUTSTANDING_ITEMS
+- Demo data: every exercise in `shadowData` now carries a `primary` field (hardcoded). New third rec in `shadowData.back` — Dumbbell Curls (primary: `biceps`) — to make the off-section tag visible without needing the picker's "Show all" path, which lands later
+- New CSS class `.primary-tag` — JetBrains Mono italic 10px, `var(--text-faint)`, smaller than the 12px `.build-ex-name` and 11px `.rec-name` it accompanies. `flex-shrink: 0` so it survives a long ex name + ellipsis
+- No `buildState` shape changes (`+ Pull in` copies `primary` along with the rest via the existing spread)
+- HANDOFF.md updated: step 3 marked DONE, NEXT advances to step 4 (WE-60 + WE-61 save buttons)
+
 ## Phase 1B Rev 10 step 2 — within-section move logic — 2026-05-16
 **Status: committed locally, push pending**
 

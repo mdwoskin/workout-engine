@@ -7,11 +7,11 @@ editing code on a new machine. Update as part of every commit per WE-46.
 
 ## Last updated
 
-- **Build-state commit:** `35a0031` — Rev 10 step 2 (WE-58 within-section
-  move logic, `↑ ↓ ⤴ ⤵`). Unchanged since.
-- **HANDOFF.md last edit:** 2026-05-16, ASUS session (Rev 10 step 2
-  sign-off bookkeeping — 5 items parked to OUTSTANDING_ITEMS.md, 3 kept;
-  step 2 hash backfilled into Active Rev plan).
+- **Build-state commit:** Rev 10 step 3 (this commit) — WE-59 primary-group
+  tag (Builder only). Hash via `git log -1`; backfilled into the Active
+  Rev plan entry on the next commit.
+- **HANDOFF.md last edit:** 2026-05-16, ASUS session (same commit — Rev 10
+  step 3 ship).
 
 ---
 
@@ -35,10 +35,11 @@ In this order:
 Run before touching code. Expected output noted inline.
 
 ```
-git log --oneline -5
-# expect HEAD = Rev 10 step 2 commit, preceded by ff497c7 (sign-off
+git log --oneline -6
+# expect HEAD = Rev 10 step 3 commit, preceded by 6cb5f73 (step 2
+# sign-off bookkeeping), 35a0031 (Rev 10 step 2), ff497c7 (sign-off
 # protocol codification), 88c62d7 (HANDOFF.md introduction), acc51e6
-# (Rev 10 step 1), 59aa97b (carryover log).
+# (Rev 10 step 1).
 
 git tag --list "we-v*"
 # expect: we-v1.1   (annotated tag on bc095cc per WE-42)
@@ -47,22 +48,24 @@ git status
 # expect: clean working tree on main, up to date with origin/main
 ```
 
-If any of the above is stale (HEAD behind the step 2 commit, tag missing,
-uncommitted work present), **stop and reconcile before starting step 3.**
+If any of the above is stale (HEAD behind the step 3 commit, tag missing,
+uncommitted work present), **stop and reconcile before starting step 4.**
 
 ---
 
 ## Current state
 
 - ✓ Phase 1 deployed via GitHub Pages (2026-05-15).
-- ⏳ **Phase 1B Rev 10 in progress.** Steps 1 + 2 shipped. Step 1 in
-  `acc51e6` (WE-57 two-tap remove + WE-58 cluster scaffold). Step 2 in
-  this commit (WE-58 within-section move logic — `↑ ↓ ⤴ ⤵` wired through a
-  single dispatcher; `mergeWithBelow` honors the locked-in `origin:'new'`
-  preservation rule). **6 of 8 Rev 10 steps remain.**
+- ⏳ **Phase 1B Rev 10 in progress.** Steps 1 + 2 + 3 shipped. Step 1
+  (`acc51e6`): WE-57 two-tap remove + WE-58 cluster scaffold. Step 2
+  (`35a0031`): WE-58 within-section move logic. Step 3 (this commit):
+  WE-59 primary-group tag — Builder Build area + Rec area only. Workout /
+  History / Exercise Detail expansion deferred to Phase 5/6. **5 of 8
+  Rev 10 steps remain.**
 - `we-v1.1` annotated tag landed retroactively on `bc095cc` (Phase 1 deploy
   point per WE-42).
-- Local `main` is one commit ahead of `origin/main` until the step 2 push.
+- Local `main` is multiple commits ahead of `origin/main` until the step 2
+  + step 3 push.
 
 ---
 
@@ -76,9 +79,13 @@ Locked in prior session. Do not reorder without explicit OK.
    Sign-off 2026-05-16: 5 items parked to OUTSTANDING_ITEMS.md
    ("Parked from 2026-05-16 Rev 10 step 2 sign-off" section), 3 kept
    as-is.
-3. ⏭️ **NEXT — WE-59 primary-group tag** (off-section, grey italic mono).
-   **STOP HERE for phone-test review gate.**
-4. ☐ WE-60 + WE-61 save buttons (in-memory; no Dexie until Phase 3).
+3. ✓ **WE-59 primary-group tag** — DONE (this commit; `git log -1` for
+   hash, backfilled on the next commit). **Builder only** (Build area +
+   Rec area). Workout / History / Exercise Detail expansion deferred to
+   Phase 5/6 — logged in OUTSTANDING_ITEMS. Phone-test review gate fires
+   on this step.
+4. ⏭️ **NEXT — WE-60 + WE-61 save buttons** (in-memory; no Dexie until
+   Phase 3).
 5. ☐ WE-62 Saved Library screen.
 6. ☐ WE-63 auto-name logic.
 7. ☐ CHANGELOG + CLAUDE.md updates; tag `we-v1.2`.
@@ -88,20 +95,27 @@ Locked in prior session. Do not reorder without explicit OK.
 
 ## Next step
 
-**Step 3 — WE-59 primary-group tag.** STOP HERE for phone-test review gate.
+**Step 4 — WE-60 + WE-61 save buttons (in-memory; no Dexie until Phase 3).**
 
-Scope (per CHANGELOG / OUTSTANDING_ITEMS):
+Scope (per CHANGELOG v1.3 entry + OUTSTANDING_ITEMS):
 
-- Render a grey italic mono text tag adjacent to exercise name when the
-  exercise's primary muscle group ≠ the section it appears in.
-- Show in Builder, Workout, History, and Exercise Detail contexts.
-- Requires per-exercise primary-group metadata. Phase 1B placeholder
-  approach: hardcode primary group on the few demo exercises currently in
-  `shadowData` + `workoutPlan`. Full library tagging is Phase 2.
-- No `buildState` shape changes expected; the tag is a render concern.
+- **WE-60:** "Save Workout" button in the Builder action bar (placement
+  TBD — near the existing per-section `+ ADD EXERCISE` row or at the
+  Builder screen header). Captures the current multi-section build into
+  an in-memory `savedWorkouts` array. Structure only — no weights/reps,
+  just the exercise structure per WE-60.
+- **WE-61:** "Save Superset" button at the bottom of each superset card.
+  Captures that superset's exercise structure into an in-memory
+  `savedSupersets` array. Structure only.
+- No Dexie/IndexedDB wiring yet (Phase 3). No Saved Library screen yet
+  (WE-62, step 5). No auto-name logic yet (WE-63, step 6) — temporary
+  names from `prompt()` or a hardcoded "Saved at HH:MM" stub.
+- Toast confirmation on save.
+- No `buildState` shape changes.
 
-Phone-test gate after step 3: verify cluster + move + tag interactions on
-iPhone before continuing to step 4.
+Phone-test review gate at step 3 (already passed by the time step 4
+starts) — step 4 is mechanical UI scaffolding, no new gate required
+until WE-62 lands in step 5 (Saved Library screen needs visual review).
 
 ---
 

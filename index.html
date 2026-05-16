@@ -186,6 +186,8 @@
   .build-ex-row + .build-ex-row { border-top: 1px dashed var(--border); margin-top: 6px; padding-top: 8px; }
   .build-ex-head { display: flex; align-items: center; justify-content: space-between; gap: 6px; min-height: 26px; padding: 0 2px 4px; }
   .build-ex-name { font-family: 'Inter Tight', sans-serif; font-size: 12px; font-weight: 500; color: var(--text); flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  /* WE-59: primary-group tag — adjacent to ex name when primary ≠ section. Grey italic mono. */
+  .primary-tag { font-family: 'JetBrains Mono', monospace; font-style: italic; font-size: 10px; font-weight: 400; color: var(--text-faint); flex-shrink: 0; white-space: nowrap; }
   .action-cluster { display: inline-flex; align-items: center; gap: 3px; flex-shrink: 0; }
   .cluster-btn { width: 24px; height: 24px; padding: 0; background: var(--bg-2); border: 1px solid var(--border-hi); color: var(--text-dim); border-radius: 4px; font-family: 'JetBrains Mono', monospace; font-size: 12px; line-height: 1; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; }
   .cluster-btn:active { background: var(--bg-3); }
@@ -699,34 +701,50 @@
 
   // ===== Shadow-populated sections (fake) =====
   // Each muscle group has an array of supersets; each superset is an array of exercises.
+  // WE-59: each exercise carries its `primary` muscle group. When primary ≠ section
+  // (e.g., Dumbbell Curls appearing under Back from a prior back/biceps pairing), the
+  // off-section tag renders next to the name. Phase 1B placeholder: primary is
+  // hardcoded here; Phase 2 will tag the full library from the Excel Control sheet.
   const shadowData = {
     back: [
-      [ { name: 'Pull-Ups', reps: 8, sets: ['bw','bw','bw','bw'] } ],
-      [ { name: 'Lat Pulldown', reps: 10, sets: [120,120,130,130] } ]
+      [ { name: 'Pull-Ups', reps: 8, sets: ['bw','bw','bw','bw'], primary: 'back' } ],
+      [ { name: 'Lat Pulldown', reps: 10, sets: [120,120,130,130], primary: 'back' } ],
+      // Off-section demo: biceps primary appearing in Back recs (from prior back/biceps pairing).
+      [ { name: 'Dumbbell Curls', reps: 10, sets: [25,25,25,25], primary: 'biceps' } ]
     ],
     biceps: [
-      [ { name: 'Dumbbell Curls', reps: 10, sets: [30,30,30,30] } ]
+      [ { name: 'Dumbbell Curls', reps: 10, sets: [30,30,30,30], primary: 'biceps' } ]
     ],
     chest: [
-      [ { name: 'DB Bench Press', reps: 8, sets: [65,65,70,70] } ]
+      [ { name: 'DB Bench Press', reps: 8, sets: [65,65,70,70], primary: 'chest' } ]
     ],
     triceps: [
-      [ { name: 'Skullcrushers', reps: 10, sets: [40,40,40,40] } ]
+      [ { name: 'Skullcrushers', reps: 10, sets: [40,40,40,40], primary: 'triceps' } ]
     ],
     shoulders: [
-      [ { name: 'Reverse Flys', reps: 12, sets: [15,15,15,15] } ]
+      [ { name: 'Reverse Flys', reps: 12, sets: [15,15,15,15], primary: 'shoulders' } ]
     ],
     legs: [
-      [ { name: 'Barbell Squat', reps: 5, sets: [185,195,205,205] } ],
-      [ { name: 'Calf Raises', reps: 15, sets: [90,90,95,'—'] } ]
+      [ { name: 'Barbell Squat', reps: 5, sets: [185,195,205,205], primary: 'legs' } ],
+      [ { name: 'Calf Raises', reps: 15, sets: [90,90,95,'—'], primary: 'legs' } ]
     ],
     core: [
-      [ { name: 'Hanging Leg Raises', reps: 12, sets: [0,0,0,0] } ]
+      [ { name: 'Hanging Leg Raises', reps: 12, sets: [0,0,0,0], primary: 'core' } ]
     ],
     cardio: [
-      [ { name: 'Treadmill', reps: '20min', sets: ['4.2mph','—','—','—'] } ]
+      [ { name: 'Treadmill', reps: '20min', sets: ['4.2mph','—','—','—'], primary: 'cardio' } ]
     ]
   };
+
+  // ===== WE-59 primary-group tag helper =====
+  // Returns a small grey-italic-mono <span> when the exercise's primary muscle group
+  // differs from the section it's rendering inside. Empty string otherwise.
+  // Phase 1B scope: Builder only (Build area + Rec area). Workout / History / Exercise
+  // Detail contexts defer to Phase 5/6 when those screens get their real data plumbing.
+  function primaryTag(exPrimary, sectionMg) {
+    if (!exPrimary || !sectionMg || exPrimary === sectionMg) return '';
+    return `<span class="primary-tag">${exPrimary}</span>`;
+  }
   // ===== Build state — what's in the build area per muscle group =====
   // Rev 10 shape: buildState[mg] = array of supersets, each = { exs: [ex,...], origin: 'normal'|'new' }.
   // Each ex may carry optional originRecIdx (number | null) — index of the rec it was pulled from,
@@ -823,6 +841,7 @@
     let html = '<div class="build-ex-row">';
     html += '<div class="build-ex-head">';
     html += `<span class="build-ex-name">${ex.name}</span>`;
+    html += primaryTag(ex.primary, mg);
     // WE-58 cluster: ↑↓ reorder within superset; ⤴ splits this exercise into a new
     // singleton superset directly below; ⤵ merges this superset with the one below;
     // ⊖ two-tap remove. ↑↓⤴⤵ dispatch via a single click handler in wireBuilderEvents
@@ -919,6 +938,7 @@
             const setsSummary = ex.sets.map(s => s === '—' ? '—' : s).join(', ');
             html += `<div class="rec-row">`;
             html += `<span class="rec-name">${ex.name}</span>`;
+            html += primaryTag(ex.primary, mg);
             html += `<span class="rec-meta">${ex.sets.length}×${ex.reps} · ${setsSummary}</span>`;
             html += `<button class="rec-add" data-pull-ex="${mg}-${recIdx}-${exIdx}" title="Pull this exercise only">+</button>`;
             html += `</div>`;
