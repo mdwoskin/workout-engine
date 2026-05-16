@@ -4,6 +4,17 @@ Chronological build log. Each rev = a deliverable in chat.
 
 ---
 
+## Phase 1B Rev 10 step 1 — action cluster + two-tap remove — 2026-05-15
+**Status: committed locally, push pending**
+
+- WE-57: `⊖` red icon per Build-area exercise row; first tap expands horizontally to red `REMOVE` button (no timeout); second tap commits removal; outside-tap or expanding another row's `⊖` collapses; mutual exclusion across rows
+- WE-58 cluster scaffold: 5-icon cluster (`↑ ↓ ⤴ ⤵ ⊖`) renders per row; only `⊖` is wired in this step. `↑`/`↓` greyed at superset boundaries; `⤴` greyed for solo-exercise supersets; `⤵` greyed for the last superset in a section. Move logic ships in step 2.
+- Side effects on remove: the superset auto-deletes when its last exercise is removed, EXCEPT supersets created by `+ NEW SUPERSET` (which persist as empty placeholder cards, each with its own `⊖`); removing an exercise that was pulled from a recommendation re-enables that rec card (back to bright `+ Pull in`)
+- buildState shape upgraded: `[[ex,ex],[ex]]` → `[{exs:[ex,ex],origin:'normal'},{exs:[ex],origin:'new'}]`. Exercises gain optional `originRecIdx` for re-enable tracking
+- `+ NEW SUPERSET` no longer injects a `[New exercise]` placeholder row — it creates a truly empty superset card (`origin='new'`) with its own `⊖`
+- Dead code: `renderSupersetTable` removed (no callers after the new render path)
+- Repo: `we-v1.1` git tag landed retroactively on `bc095cc` (Phase 1 deploy point) per WE-42, resolving the open tag-convention question in `OUTSTANDING_ITEMS.md` item 1
+
 ## Phase 1 deploy — 2026-05-15
 **Status: live on GitHub Pages**
 

@@ -181,6 +181,19 @@
   .rec-card .rec-row .rec-meta { color: var(--text-faint); }
   .rec-card .rec-row .rec-add { background: var(--bg-3); color: var(--text); border: 1px solid var(--border-hi); border-radius: 3px; width: 22px; height: 22px; display: inline-flex; align-items: center; justify-content: center; font-weight: 700; cursor: pointer; font-size: 12px; }
   .rec-card.pulled .rec-row .rec-add { display: none; }
+  /* ===== Rev 10 step 1: action cluster + two-tap remove (WE-57, WE-58) ===== */
+  .build-ex-row { padding: 4px 2px; }
+  .build-ex-row + .build-ex-row { border-top: 1px dashed var(--border); margin-top: 6px; padding-top: 8px; }
+  .build-ex-head { display: flex; align-items: center; justify-content: space-between; gap: 6px; min-height: 26px; padding: 0 2px 4px; }
+  .build-ex-name { font-family: 'Inter Tight', sans-serif; font-size: 12px; font-weight: 500; color: var(--text); flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .action-cluster { display: inline-flex; align-items: center; gap: 3px; flex-shrink: 0; }
+  .cluster-btn { width: 24px; height: 24px; padding: 0; background: var(--bg-2); border: 1px solid var(--border-hi); color: var(--text-dim); border-radius: 4px; font-family: 'JetBrains Mono', monospace; font-size: 12px; line-height: 1; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .cluster-btn:active { background: var(--bg-3); }
+  .cluster-btn.disabled { opacity: 0.3; cursor: default; pointer-events: none; }
+  .cluster-btn.rm { color: var(--danger); border-color: var(--danger); background: transparent; }
+  .cluster-btn.rm.expanded { width: auto; padding: 0 10px; height: 24px; background: var(--danger); color: #fff; font-weight: 700; font-size: 10px; letter-spacing: 0.06em; border-color: var(--danger); }
+  .empty-ss { padding: 12px 10px; text-align: center; font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--text-faint); display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap; }
+  .empty-ss span { flex: 1; text-align: left; }
 </style>
 </head>
 <body>
@@ -715,7 +728,11 @@
     ]
   };
   // ===== Build state — what's in the build area per muscle group =====
-  // Keyed by muscle group; each value is an array of supersets (each a list of {name, reps, sets})
+  // Rev 10 shape: buildState[mg] = array of supersets, each = { exs: [ex,...], origin: 'normal'|'new' }.
+  // Each ex may carry optional originRecIdx (number | null) — index of the rec it was pulled from,
+  // used for the WE-57 side effect: removing a pulled-in exercise re-enables its rec card.
+  // origin === 'new' marks supersets created via + NEW SUPERSET; per WE-58 these persist as empty
+  // placeholders rather than auto-deleting on emptiness.
   const buildState = {};
   // Keyed by muscle group; Set of recommendation indices that have been pulled
   const pulledRecs = {};
@@ -727,27 +744,73 @@
     });
   }
 
-  function renderSupersetTable(superset, opts) {
-    // opts: { showThead: bool, isCardio: bool, repsLabel: 'REPS'|'DUR' }
-    const repsLabel = opts.repsLabel || 'REPS';
-    let html = '';
-    if (opts.showThead !== false) {
-      html += `<thead><tr><th>EXERCISE</th><th style="width: 14%;">${repsLabel}</th><th style="width: 16%;">S1</th><th style="width: 16%;">S2</th><th style="width: 16%;">S3</th><th style="width: 16%;">S4</th></tr></thead>`;
+  // ===== Two-tap remove (WE-57) — global state for mutual exclusion + outside-tap collapse =====
+  let expandedRemoveBtn = null;
+  function collapseExpandedRemove() {
+    if (expandedRemoveBtn && expandedRemoveBtn.isConnected) {
+      expandedRemoveBtn.classList.remove('expanded');
+      expandedRemoveBtn.textContent = '⊖';
     }
-    html += '<tbody>';
-    superset.forEach(ex => {
-      html += `<tr><td>${ex.name}</td><td class="r">${ex.reps}</td>`;
-      ex.sets.forEach(s => {
-        const cls = s === '—' ? 'empty' : '';
-        html += `<td class="${cls}">${s}</td>`;
-      });
-      html += `</tr>`;
+    expandedRemoveBtn = null;
+  }
+  // Outside-tap collapses any expanded REMOVE. Cluster button handlers use stopPropagation
+  // so this only fires for taps that aren't on the expanded button itself.
+  document.addEventListener('click', (e) => {
+    if (expandedRemoveBtn && !expandedRemoveBtn.contains(e.target)) {
+      collapseExpandedRemove();
+    }
+  });
+
+  function removeExerciseFromBuild(mg, ssIdx, exIdx) {
+    const ss = buildState[mg][ssIdx];
+    const ex = ss.exs[exIdx];
+    // WE-57 side effect: re-enable parent rec if exercise originated from a pulled superset
+    if (ex.originRecIdx !== null && ex.originRecIdx !== undefined) {
+      pulledRecs[mg].delete(ex.originRecIdx);
+    }
+    ss.exs.splice(exIdx, 1);
+    // WE-57/WE-58 side effect: empty superset auto-deletes UNLESS it was created by + NEW SUPERSET
+    if (ss.exs.length === 0 && ss.origin !== 'new') {
+      buildState[mg].splice(ssIdx, 1);
+    }
+    toast(`Removed ${ex.name}`);
+  }
+
+  function renderBuildExRow(mg, ssIdx, exIdx, ex, ss, isCardio) {
+    const isFirst = exIdx === 0;
+    const isLast = exIdx === ss.exs.length - 1;
+    const isLastSS = ssIdx === buildState[mg].length - 1;
+    const isAlone = ss.exs.length <= 1;
+    const repsLabel = isCardio ? 'DUR' : 'REPS';
+    let html = '<div class="build-ex-row">';
+    html += '<div class="build-ex-head">';
+    html += `<span class="build-ex-name">${ex.name}</span>`;
+    // WE-58 cluster: ↑ ↓ ⤴ ⤵ ⊖ — step 1 wires only ⊖; ↑↓⤴⤵ are placeholders for step 2.
+    html += '<span class="action-cluster">';
+    html += `<button class="cluster-btn${isFirst ? ' disabled' : ''}" data-todo="move-up" title="move up">↑</button>`;
+    html += `<button class="cluster-btn${isLast ? ' disabled' : ''}" data-todo="move-down" title="move down">↓</button>`;
+    html += `<button class="cluster-btn${isAlone ? ' disabled' : ''}" data-todo="split" title="split into own superset">⤴</button>`;
+    html += `<button class="cluster-btn${isLastSS ? ' disabled' : ''}" data-todo="merge" title="merge with superset below">⤵</button>`;
+    html += `<button class="cluster-btn rm" data-rm data-mg="${mg}" data-ss="${ssIdx}" data-ex="${exIdx}" title="remove">⊖</button>`;
+    html += '</span>';
+    html += '</div>';
+    html += '<table class="ss">';
+    if (isFirst) {
+      html += `<thead><tr><th style="width: 16%;">${repsLabel}</th><th style="width: 21%;">S1</th><th style="width: 21%;">S2</th><th style="width: 21%;">S3</th><th style="width: 21%;">S4</th></tr></thead>`;
+    }
+    html += `<tbody><tr><td class="r" style="width: 16%;">${ex.reps}</td>`;
+    ex.sets.forEach(s => {
+      const cls = s === '—' ? 'empty' : '';
+      html += `<td class="${cls}" style="width: 21%;">${s}</td>`;
     });
-    html += '</tbody>';
+    html += '</tr></tbody></table>';
+    html += '</div>';
     return html;
   }
 
   function updateSectionsArea() {
+    // Any expanded REMOVE buttons are about to be orphaned by the re-render — drop the reference.
+    expandedRemoveBtn = null;
     const area = document.getElementById('sections-area');
     if (selectedMG.size === 0) {
       area.innerHTML = '<div class="empty-builder" style="text-align: center; padding: 30px 10px; border: 1px dashed var(--border-hi); border-radius: 8px; color: var(--text-faint); font-family: \'JetBrains Mono\', monospace; font-size: 11px; line-height: 1.6;">Select muscle groups above.<br>Recommendations will appear once you pick a focus.</div>';
@@ -761,8 +824,9 @@
       const name = mgNames[mg];
       const isCardio = mg === 'cardio';
       const hasRecs = recs.length > 0;
+      const totalExs = built.reduce((n, ss) => n + ss.exs.length, 0);
 
-      html += `<div><div class="sec-h"><h2>${name}</h2><span class="m">${built.length} added · ${hasRecs ? recs.length + ' rec' : 'no history'}</span></div>`;
+      html += `<div><div class="sec-h"><h2>${name}</h2><span class="m">${totalExs} added · ${hasRecs ? recs.length + ' rec' : 'no history'}</span></div>`;
       html += `<div class="section"><div class="section-body">`;
 
       // ===== BUILD AREA =====
@@ -770,12 +834,22 @@
       if (built.length === 0) {
         html += `<div class="build-empty">Empty section.<br>Pull from recommendations below, or tap <strong style="color: var(--text-dim);">+ ADD EXERCISE</strong> to build manually.</div>`;
       } else {
-        built.forEach((superset, ssIdx) => {
-          if (isCardio) {
-            html += `<div class="ss-wrap"><table class="ss">${renderSupersetTable(superset, { showThead: true, repsLabel: 'DUR' })}</table></div>`;
+        built.forEach((ss, ssIdx) => {
+          const wrapOpen = isCardio ? `<div class="ss-wrap">` : `<div class="superset"><div class="ss-wrap">`;
+          const wrapClose = isCardio ? `</div>` : `</div></div>`;
+          html += wrapOpen;
+          if (ss.exs.length === 0) {
+            // Empty superset placeholder (origin: 'new'); persists until populated or manually removed (WE-58)
+            html += `<div class="empty-ss">`;
+            html += `<span>Empty superset · tap <strong style="color: var(--text-dim);">+ ADD EXERCISE</strong> to populate</span>`;
+            html += `<button class="cluster-btn rm" data-rm data-mg="${mg}" data-ss="${ssIdx}" title="remove this empty superset">⊖</button>`;
+            html += `</div>`;
           } else {
-            html += `<div class="superset"><div class="ss-wrap"><table class="ss">${renderSupersetTable(superset, { showThead: true })}</table></div></div>`;
+            ss.exs.forEach((ex, exIdx) => {
+              html += renderBuildExRow(mg, ssIdx, exIdx, ex, ss, isCardio);
+            });
           }
+          html += wrapClose;
         });
       }
       html += `<button class="btn sm block" style="margin-top: 8px;" data-modal-add="${mg}">+ ADD EXERCISE TO ${name.toUpperCase()}</button>`;
@@ -827,27 +901,26 @@
         document.getElementById('modal-add').classList.add('open');
       });
     });
-    // + NEW SUPERSET — adds an empty placeholder superset
+    // + NEW SUPERSET — origin: 'new' so it persists as an empty placeholder per WE-58
     area.querySelectorAll('[data-new-superset]').forEach(b => {
       b.addEventListener('click', () => {
         const mg = b.getAttribute('data-new-superset');
-        // For preview, add an empty superset with a placeholder exercise
-        buildState[mg].push([
-          { name: '[New exercise]', reps: '—', sets: ['—','—','—','—'] }
-        ]);
-        toast(`New superset in ${mgNames[mg]} · tap + Add Exercise to populate`);
+        buildState[mg].push({ exs: [], origin: 'new' });
+        toast(`Empty superset added to ${mgNames[mg]}`);
         updateSectionsArea();
       });
     });
-    // + Pull in (whole superset)
+    // + Pull in (whole superset) — tag each ex with originRecIdx so removal re-enables the rec (WE-57)
     area.querySelectorAll('[data-pull-superset]').forEach(b => {
       b.addEventListener('click', (e) => {
         e.stopPropagation();
-        const [mg, recIdx] = b.getAttribute('data-pull-superset').split('-');
-        const idx = parseInt(recIdx);
+        const [mg, recIdxStr] = b.getAttribute('data-pull-superset').split('-');
+        const idx = parseInt(recIdxStr);
         const rec = shadowData[mg][idx];
-        // Deep-copy so future edits to Build don't mutate the recommendation
-        buildState[mg].push(rec.map(ex => ({ ...ex, sets: [...ex.sets] })));
+        buildState[mg].push({
+          exs: rec.map(ex => ({ ...ex, sets: [...ex.sets], originRecIdx: idx })),
+          origin: 'normal'
+        });
         pulledRecs[mg].add(idx);
         const label = rec.length > 1 ? `superset of ${rec.length}` : rec[0].name;
         toast(`Pulled in ${label}`);
@@ -862,7 +935,10 @@
         let added = 0;
         recs.forEach((rec, idx) => {
           if (!pulledRecs[mg].has(idx)) {
-            buildState[mg].push(rec.map(ex => ({ ...ex, sets: [...ex.sets] })));
+            buildState[mg].push({
+              exs: rec.map(ex => ({ ...ex, sets: [...ex.sets], originRecIdx: idx })),
+              origin: 'normal'
+            });
             pulledRecs[mg].add(idx);
             added++;
           }
@@ -872,17 +948,48 @@
         updateSectionsArea();
       });
     });
-    // + Pull single exercise within a recommendation
+    // + Pull single exercise within a recommendation — does NOT mark the parent rec as pulled,
+    // so originRecIdx stays null and removing the exercise leaves the rec card unchanged.
     area.querySelectorAll('[data-pull-ex]').forEach(b => {
       b.addEventListener('click', (e) => {
         e.stopPropagation();
-        const [mg, recIdx, exIdx] = b.getAttribute('data-pull-ex').split('-');
-        const ex = shadowData[mg][parseInt(recIdx)][parseInt(exIdx)];
-        // Pulling a single exercise creates a new single-ex superset in build
-        buildState[mg].push([{ ...ex, sets: [...ex.sets] }]);
+        const [mg, recIdxStr, exIdxStr] = b.getAttribute('data-pull-ex').split('-');
+        const ex = shadowData[mg][parseInt(recIdxStr)][parseInt(exIdxStr)];
+        buildState[mg].push({
+          exs: [{ ...ex, sets: [...ex.sets], originRecIdx: null }],
+          origin: 'normal'
+        });
         toast(`Pulled in ${ex.name} as its own superset`);
-        // Note: we don't mark the parent recommendation as fully pulled — only individual marker
         updateSectionsArea();
+      });
+    });
+    // ⊖ two-tap remove (WE-57) — first tap expands to REMOVE; second tap commits.
+    // Mutual exclusion + outside-tap collapse handled via the global expandedRemoveBtn state
+    // and the document-level click listener defined alongside the helpers.
+    area.querySelectorAll('.cluster-btn.rm[data-rm]').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        if (btn.classList.contains('expanded')) {
+          // Second tap: commit removal
+          const mg = btn.dataset.mg;
+          const ssIdx = parseInt(btn.dataset.ss);
+          const exIdxStr = btn.dataset.ex;
+          if (exIdxStr === undefined) {
+            // ⊖ on an empty-superset placeholder card removes the card itself
+            buildState[mg].splice(ssIdx, 1);
+            toast('Removed empty superset');
+          } else {
+            removeExerciseFromBuild(mg, ssIdx, parseInt(exIdxStr));
+          }
+          expandedRemoveBtn = null;
+          updateSectionsArea();
+        } else {
+          // First tap: collapse any other expanded REMOVE, then expand this one
+          collapseExpandedRemove();
+          btn.classList.add('expanded');
+          btn.textContent = 'REMOVE';
+          expandedRemoveBtn = btn;
+        }
       });
     });
   }

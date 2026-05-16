@@ -5,18 +5,18 @@ As of 2026-05-15.
 ## Immediate next steps (priority order)
 
 ### 1. Build Rev 10 in code
-Rev 10 spec is captured in WE-57 through WE-63 of `Workout_Engine_Rules_v1.3.md`. Code NOT yet written.
+Rev 10 spec is captured in WE-57 through WE-63 of `Workout_Engine_Rules_v1.3.md`. In progress on Phase 1B.
 
 Starting point: current `index.html` (Phase 1 Rev 9). Apply these deltas:
 
-- **Two-tap remove** (WE-57): `⊖` red circle, expands horizontally to `REMOVE` on first tap, removes on second. No timeout. Outside-tap collapses. Mutual exclusion across rows.
-- **Move buttons** (WE-58): `↑ ↓ ⤴ ⤵` plus the `⊖` = 5-icon cluster per exercise row. All always-visible.
+- ~~**Two-tap remove** (WE-57)~~ — shipped in Rev 10 step 1.
+- **Move buttons** (WE-58): cluster scaffold (`↑ ↓ ⤴ ⤵` plus `⊖`) shipped in step 1; **move logic pending in step 2**.
 - **Primary-group tag** (WE-59): grey italic mono text adjacent to exercise name when primary group ≠ section. Show in Builder, Workout, History, ExerciseDetail.
 - **Save Workout button** in Builder action bar (WE-60). Structure only.
 - **Save Superset button** at bottom of each superset card (WE-61). Structure only.
 - **Saved Library screen** (WE-62): accessible from Home `📋 Saved templates` and Builder `📋 INSERT SAVED SUPERSET` buttons. WORKOUTS/SUPERSETS toggle. Cards with name, preview, dates, use count, `▶ Use` and `✕ Delete`.
 - **Auto-name logic** (WE-63): `Custom [GROUP] [Type] #N`; multi-group workouts join with `/`; supersets use section context; "lowest available N" rule via `is_auto_named` flag.
-- **Side effects** (WE-15, WE-57, WE-58): empty supersets auto-delete (except `+ NEW SUPERSET` placeholders); pulled rec re-enables when its exercise is removed from Build.
+- ~~**Side effects** (WE-15, WE-57, WE-58)~~ — shipped in step 1 (empty-superset auto-delete + pulled-rec re-enable).
 
 ### 2. Phase 2: Exercise library + filter wiring
 - Hardcode library from cleaned Excel Control sheet
@@ -41,10 +41,10 @@ Starting point: current `index.html` (Phase 1 Rev 9). Apply these deltas:
 
 ## Carryover from 2026-05-15 deploy session
 
-1. **Tag convention question (WE-42 vs WE-46).** Today shipped a changelog entry for the Phase 1 deploy but no git tag. Open: does `we-v1.1` land retroactively on `bc095cc` (Phase 1 deploy point), or wait for Phase 1B / Rev 10 completion? Resolve before tagging anything.
-2. **`gh` CLI PATH gotcha.** Installed at `C:\Program Files\GitHub CLI\gh.exe`. Not on Bash PATH in the deploy-session shell; PowerShell needed `& "..."` call operator. Fresh shell may pick up the system PATH update — test first. Auth persists in OS keyring; no re-login expected.
-3. **Section 1 above is a working checklist, not archival.** As Rev 10 deltas (WE-57–WE-63) ship, remove items rather than checking them in place. When all 8 ship, the section collapses to one line or disappears.
-4. **WE-N citation discipline.** Today's handoff prompt mis-cited WE-29 for the 15-iteration rule (actually in the unnumbered Versioning Protocol preamble; logged in Spec hygiene below). Verify every WE-N citation against the rules doc — including in prompts — before accepting.
+1. ~~**Tag convention question (WE-42 vs WE-46).**~~ Resolved 2026-05-15: `we-v1.1` tagged retroactively on `bc095cc` (Phase 1 deploy point); Rev 10 will ship as `we-v1.2`. Preserves the WE-46 1:1 changelog ↔ pipeline mapping.
+2. **`gh` CLI PATH gotcha (deploy-session machine only).** Installed at `C:\Program Files\GitHub CLI\gh.exe`. Not on Bash PATH in the deploy-session shell; PowerShell needed `& "..."` call operator. Fresh shell may pick up the system PATH update — test first. Auth persists in OS keyring; no re-login expected. Surface Pro 7 (current build env) presumed clean until proven otherwise.
+3. **Section 1 above is a working checklist, not archival.** As Rev 10 deltas (WE-57–WE-63) ship, strike them rather than check them in place. When all 8 ship, the section collapses to one line or disappears.
+4. **WE-N citation discipline.** The handoff that mis-cited WE-29 for the 15-iteration rule (actually in the unnumbered Versioning Protocol preamble) is logged. Folding into v1.4 spec hygiene; tracked below — no further action now.
 
 ## Open nuances (not deeply resolved)
 
