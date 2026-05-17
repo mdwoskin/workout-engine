@@ -7,11 +7,12 @@ editing code on a new machine. Update as part of every commit per WE-46.
 
 ## Last updated
 
-- **Build-state commit:** Rev 10 step 4 (this commit) — WE-60 + WE-61 save
-  buttons (in-memory, structure-only). Hash via `git log -1`; backfilled
-  into the Active Rev plan entry on the next commit.
-- **HANDOFF.md last edit:** 2026-05-16, ASUS session (same commit — Rev 10
-  step 4 ship).
+- **Build-state commit:** `fa4b870` — Rev 10 step 4 (WE-60 + WE-61 save
+  buttons, in-memory, structure-only). Pushed to `origin/main`.
+- **HANDOFF.md last edit:** 2026-05-17, ASUS session (session wrap —
+  step 4 hash backfilled; ASUS machine gotchas captured from
+  2026-05-16/17 work; step 4 sign-off defaulted to `(a) keep all` per
+  CLAUDE.md §7 since user dispositioned by silence).
 
 ---
 
@@ -89,12 +90,12 @@ Locked in prior session. Do not reorder without explicit OK.
    list: `+ ADD EXERCISE` modal needs its Done action wired to
    `buildState`, plus a larger demo library to exercise WE-59 properly.
 4. ✓ **WE-60 + WE-61 save buttons** (in-memory; no Dexie until Phase 3) —
-   DONE (this commit; `git log -1` for hash, backfilled on the next
-   commit). `+ SAVE WORKOUT` block button at bottom of Builder when
-   build is non-empty; `+ SAVE SUPERSET` small inline button at the
+   DONE (`fa4b870`). `+ SAVE WORKOUT` block button at bottom of Builder
+   when build is non-empty; `+ SAVE SUPERSET` small inline button at the
    bottom of each non-empty, non-cardio superset. `prompt()` with
    auto-stub default name; cancel aborts; empty/whitespace falls back to
-   default.
+   default. Sign-off 2026-05-17: 9 items defaulted to `(a) keep all` per
+   CLAUDE.md §7 (user dispositioned by silence; nothing parked).
 5. ⏭️ **NEXT — WE-62 Saved Library screen.**
 6. ☐ WE-63 auto-name logic.
 7. ☐ CHANGELOG + CLAUDE.md updates; tag `we-v1.2`.
@@ -198,12 +199,25 @@ decisions it governs.
 - `python` on PATH is the Microsoft Store stub. Use Node tooling for local
   serving (see below) instead of `python -m http.server`.
 
-### ASUS (current machine)
+### ASUS (current machine, captured 2026-05-17)
 
-- Status TBD on first use beyond `git`. Presumed clean until proven
-  otherwise. **Before relying on any tool, run `where.exe <tool>` to
-  confirm.**
-- Add new entries here as quirks surface, dated.
+- Node + `npx` confirmed at `C:\Program Files\nodejs\`. Both on PATH.
+  First-run `npx --yes serve` is slow (downloads `serve` from npm); plan
+  for ~10-20s before the listener binds.
+- **Wi-Fi: connect to `Apt 6F WiFi` (the main router), NOT
+  `Apt 6F WiFi_EXT`.** The extender SSID does client isolation by
+  default — phone-on-extender can't reach laptop-on-anything (verified
+  2026-05-17). Switching the laptop's Wi-Fi to the main router SSID
+  fixed phone connectivity immediately.
+- Network profile is Public — that's fine. Windows Defender auto-
+  prompted on first `npx serve` launch and Allow rules for Node
+  (Inbound, Public, all ports, both TCP and UDP) are now in place
+  pointing at `C:\Program Files\nodejs\node.exe`. No manual rule needed.
+- LAN IPv4 has been stable at `192.168.0.12` across SSID swaps in this
+  network. Verify with `ipconfig` before assuming.
+- iOS Safari on phone: hard-refresh by killing the tab and reopening to
+  bust cached HTML if pull-to-refresh doesn't pick up the new build
+  (especially after a GH Pages push — local serve picks up immediately).
 
 ### Local rendering (any machine)
 
