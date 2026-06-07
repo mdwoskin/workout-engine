@@ -4,6 +4,14 @@ Chronological build log. Each rev = a deliverable in chat.
 
 ---
 
+## WE-63 case fix — Title Case — 2026-06-07
+**Status: committed locally, push pending**
+
+- Drop `.toUpperCase()` in `autoNameGroupKey()`. `mgNames` values are already Title Case (`Back`, `Biceps`, …) so the join produces `Back/Biceps Workout #N` directly. Resolves a Rev 10 step 6 design call (uppercase) that the user reversed post-`we-v1.2` ship: Rev 11 spec uses Title Case end-to-end, so leaving the deployed build on uppercase would be a contradicting state for as long as Rev 10 is current
+- Comment on the saved-templates state block also updated from "group uppercase" to "Title Case mg names" so future readers don't get whiplash
+- Pure case-style change. No schema, no algorithm, no UX flow change. In-memory saved entries clear on reload so there's no migration concern
+- `we-v1.2` tag stays on the Rev 10 wrap commit (`ae264b6`); this is a fast-follow patch, not a re-tag
+
 ## we-v1.2 — Phase 1B Rev 10 complete — 2026-06-07
 **Status: tagged locally, push pending**
 

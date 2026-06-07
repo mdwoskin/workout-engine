@@ -797,8 +797,8 @@
   // Structure only — no weights/reps, just the exercise identity per WE-60.
   // Phase 1B placeholder: held in JS memory; cleared on reload. Phase 3 (Dexie)
   // wires the saved_workouts / saved_supersets stores from WE-34.
-  // WE-63 auto-name: `Custom [GROUP] [Type] #N` (group uppercase, multi-group joined
-  // with `/`). #N is the lowest available positive integer for that [GROUP] [Type]
+  // WE-63 auto-name: `Custom [GROUP] [Type] #N` (Title Case mg names, multi-group
+  // joined with `/`). #N is the lowest available positive integer for that [GROUP] [Type]
   // key, scanning only entries with isAutoNamed: true so user-edited names don't
   // poison the auto-name space. User can override the default in the prompt; the
   // saved entry records isAutoNamed=false when the user typed something different.
@@ -809,9 +809,10 @@
   let nextSavedSupersetId = 1;  // monotonic id counter
 
   function autoNameGroupKey(mgs) {
-    // Per WE-63: uppercase mg display names joined with `/`. Order = iteration order
-    // (insertion order for selectedMG; single mg for supersets).
-    return mgs.map(mg => (mgNames[mg] || mg).toUpperCase()).join('/');
+    // Per WE-63 (Title Case as of 2026-06-07 post-we-v1.2 case fix): mgNames values
+    // are already Title Case (`Back`, `Biceps`, …) so the join is the whole thing.
+    // Order = iteration order (insertion order for selectedMG; single mg for supersets).
+    return mgs.map(mg => mgNames[mg] || mg).join('/');
   }
   function lowestAvailableAutoNameN(items, baseName) {
     // "Lowest available N" per WE-63 — gap-fill semantics. Only auto-named entries
