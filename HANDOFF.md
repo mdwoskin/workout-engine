@@ -7,11 +7,13 @@ editing code on a new machine. Update as part of every commit per WE-46.
 
 ## Last updated
 
-- **Build-state commit:** `<pending>` — Rev 10 step 6 (WE-63 auto-name
-  logic). Local only; push pending.
-- **HANDOFF.md last edit:** 2026-06-07, ASUS session (step 6 ship —
-  WE-63 auto-name `Custom [GROUP] [Type] #N` with lowest-available-N
-  gap-fill via `isAutoNamed` flag).
+- **Build-state commit:** `<pending>` — Rev 10 step 7 (wrap commit:
+  cumulative CHANGELOG rollup, CLAUDE.md §5 bump, Rev 11 OUTSTANDING
+  refinements folded in, `we-v1.2` annotated tag). Local only; push
+  pending (step 8).
+- **HANDOFF.md last edit:** 2026-06-07, ASUS session (Rev 10 wrap —
+  step 7 ship; `we-v1.2` tag lands on this commit per WE-42; next is
+  step 8 = `git push origin main --tags` → GH Pages deploy).
 
 ---
 
@@ -126,28 +128,35 @@ Locked in prior session. Do not reorder without explicit OK.
    means the next auto-save picks #2, not #4). Counters renamed:
    `savedWorkoutSeq` / `savedSupersetSeq` → `nextSavedWorkoutId` /
    `nextSavedSupersetId` (id role only, no name semantics).
-7. ⏭️ **NEXT — CHANGELOG + CLAUDE.md updates; tag `we-v1.2`.**
-8. ☐ Push + verify GH Pages deploy.
+7. ✓ **CHANGELOG cumulative + CLAUDE.md bump + `we-v1.2` tag** — DONE
+   (this commit). CHANGELOG.md gains a `we-v1.2` rollup entry above
+   the per-step entries; CLAUDE.md §5 Phase 1B promoted from "Step 1
+   of 8 shipped" to "Rev 10 complete (we-v1.2)"; OUTSTANDING_ITEMS
+   Rev 11 proposal refined with three-state action cluster, recs in
+   `+ ADD EXERCISE` picker, save-as-superset on 2+ only / top-positioned;
+   `we-v1.2` annotated tag landed per WE-42.
+8. ⏭️ **NEXT — `git push origin main --tags`** → GH Pages deploy +
+   verify on phone.
 
 ---
 
 ## Next step
 
-**Step 7 — CHANGELOG + CLAUDE.md updates; tag `we-v1.2`.**
+**Step 8 — Push `we-v1.2`.**
 
 Scope:
 
-- `CHANGELOG.md` — step 6 entry already landed in this commit; step 7
-  rolls up the Rev 10 summary entry under the cumulative tag heading,
-  noting WE-57 through WE-63 + the palette refresh that landed between
-  steps 5 and 6.
-- `CLAUDE.md` — bump §5 "Build Phase Status" Phase 1B line from
-  "Step 1 of 8 shipped" to "Rev 10 complete (we-v1.2)"; refresh
-  Phase 2 entry if any framing changed.
-- `git tag -a we-v1.2 -m "Rev 10 complete (WE-57 through WE-63)"`
-  pointing at HEAD per WE-42.
-- Phone-test gate before push at step 8 — sanity-check the tagged
-  build via local serve OR after the step 8 push via GH Pages.
+- `git push origin main --tags` — pushes the step 7 wrap commit plus
+  the `we-v1.2` annotated tag in one operation. GH Pages auto-rebuilds
+  in ~30-60s.
+- Phone-verify the deployed build at
+  https://mdwoskin.github.io/workout-engine/ after the rebuild lands.
+  Walk the same paths as the step 5 / 6 phone tests so the deploy
+  state matches local-serve behavior.
+
+After step 8 ships and verifies, Rev 10 is fully closed and the next
+session can begin Rev 11 by bumping the rules doc to `v1.4` (per the
+OUTSTANDING_ITEMS "Rev 11 — Builder UX overhaul" entry).
 
 ---
 

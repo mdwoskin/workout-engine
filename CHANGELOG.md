@@ -4,6 +4,24 @@ Chronological build log. Each rev = a deliverable in chat.
 
 ---
 
+## we-v1.2 — Phase 1B Rev 10 complete — 2026-06-07
+**Status: tagged locally, push pending**
+
+Rev 10 wraps. Phase 1B build pipeline now spans WE-57 through WE-63
+end-to-end, plus a palette refresh and OUTSTANDING refinements for
+the upcoming Rev 11 Builder UX overhaul. Per-step detail in the
+entries below; this entry is the cumulative rollup at the
+`we-v1.2` annotated tag (WE-42).
+
+- **WE-57 + WE-58 (steps 1–2)** — action cluster (`↑ ↓ ⤴ ⤵ ⊖`) + two-tap remove + within-section move logic (split / merge)
+- **WE-59 (step 3)** — primary-group tag in the Builder Build and Rec areas; Workout / History / Exercise Detail expansion deferred to Phase 5/6
+- **WE-60 + WE-61 (step 4)** — save-workout / save-superset buttons; in-memory `savedWorkouts` / `savedSupersets`; structure-only
+- **WE-62 (step 5)** — Saved Library screen with WORKOUTS / SUPERSETS toggle, structure preview, `▶ Use` and `✕ Delete`; `useCount` schema; `hydrateInsertedEx` placeholder injection so saved-template Use doesn't crash the Build-area renderer
+- **Palette refresh (between steps 5 and 6)** — teal/dark theme applied across `:root` + 18 hardcoded SVG hex literals
+- **WE-63 (step 6)** — auto-name `Custom [GROUP] [Type] #N` with `[GROUP]` derived from sections that actually have exercises (uppercase, `/`-joined), `#N` = lowest available via gap-fill (scans only `isAutoNamed: true` entries), `isAutoNamed` schema field added to both saved types
+- **Step 7 (this entry)** — CHANGELOG cumulative rollup; CLAUDE.md §5 Phase 1B status bumped to "Rev 10 complete (we-v1.2)"; `we-v1.2` annotated tag landed on the wrap commit per WE-42; Rev 11 OUTSTANDING refinements folded in (recommendations relocate into `+ ADD EXERCISE` picker; per-exercise action cluster three-state model — singleton-alone all-grey, singleton-with-peers merge-icon→modal, in-superset `↑`/`↓`/breakout; save-as-superset selector only on 2+ ex supersets, top-positioned — resolves the Phase 1B known issue on singleton save buttons)
+- **Step 8 (pending)** — `git push origin main --tags` → GH Pages auto-deploy
+
 ## Phase 1B Rev 10 step 6 — WE-63 auto-name logic — 2026-06-07
 **Status: committed locally, push pending**
 

@@ -57,9 +57,13 @@ rules-doc bump to `v1.4` since several Rev 10 rules are superseded.
   `primary`, append `/ [Group2]`. WE-63 auto-name `[GROUP]` token
   derives from this. Resolves what would otherwise have been a
   blocker for the new flow.
-- **Recommendations area** — removed from the Builder entirely.
-  Future home: Home tab, based on typical sequencing of workouts.
-  Out of scope for Rev 11; revisit much later as its own Rev.
+- **Recommendations area** — removed from the Builder (no longer
+  pinned below the muscle group). **New location: inside the
+  `+ ADD EXERCISE` picker modal** — recs from history surface in the
+  picker alongside the full exercise list, so they only appear when
+  the user is actively choosing what to add. (Future v3 also surfaces
+  recs on Home tab based on typical workout sequencing — out of scope
+  for Rev 11.) Refined 2026-06-07.
 - **`+ ADD CARDIO`** — pinned to the top of the build area as its own
   always-present section (not chip-derived). Cardio's parameters
   (incline, speed, distance vs. reps/weight) justify a distinct UI
@@ -94,22 +98,38 @@ from the rules above.
   context) + a `+ NEW SUPERSET` option. Picking an existing one
   appends the exercise into that superset; picking `+ NEW SUPERSET`
   creates a singleton.
-- **Swipe-to-delete** — supersedes WE-57 two-tap ⊖. Two-stage: first
+- **Swipe-to-delete** — universal remove mechanism across all
+  exercise states (supersedes WE-57 two-tap ⊖). Two-stage: first
   swipe reveals a DELETE affordance; second commits. Outside-tap
   collapses, matching today's mutual-exclusion model.
-- **Merge-icon per exercise** — supersedes WE-58 `⤴` / `⤵`. Tap →
-  chooser modal listing existing supersets (concise: exercise names,
-  with section header) → pick one → exercise moves into that
-  superset. Same modal shape as the `+ ADD EXERCISE` followup, for
-  consistency.
-- **Within-superset reorder** (`↑` / `↓` from WE-58) — TBD. Likely
-  stays as swipe-up/down or arrow buttons; flag in v1.4 rules.
+- **Per-exercise action cluster — three-state model (refined
+  2026-06-07).** Controls available depend on the exercise's context;
+  supersedes WE-58 cluster entirely.
+
+  | State | Controls |
+  |---|---|
+  | Singleton in mg, no other exercises in same mg | All greyed (only swipe-to-delete works) |
+  | Singleton in mg, other exercises exist in same mg | **Merge icon** active → chooser modal (existing supersets in this mg + `+ NEW SUPERSET`). All other controls greyed |
+  | One of 2+ exercises in a superset | `↑` (grey at top) / `↓` (grey at bottom) / **breakout arrow** (split out into own singleton) |
+
+  No `⤵` merge-down icon — merging is exclusively driven by the
+  singleton-with-peers merge icon → modal flow above. The Rev 10
+  `⤴` / `⤵` cluster goes away entirely.
+- **Save-as-superset selector** — only renders on 2+ exercise
+  supersets (singletons get nothing). **Positioned at the top** of
+  the superset card. Resolves the Phase 1B known issue about
+  misleading singleton save buttons (struck below). Refined
+  2026-06-07.
 
 ### Rules-doc impact (v1.4 bump)
 
 - **Supersedes WE-57** (two-tap remove) — replaced by swipe-to-delete.
 - **Supersedes WE-58** (action cluster `↑ ↓ ⤴ ⤵ ⊖`) — `⊖` → swipe;
-  `⤴`/`⤵` → merge-icon modal; `↑`/`↓` → TBD.
+  `⤴`/`⤵` → three-state cluster (per refinement 2026-06-07): singleton+peers
+  shows merge-icon → modal, in-superset shows `↑`/`↓`/breakout, lone singleton
+  greyed. `↑`/`↓` stay as button arrows (NOT swipe per user pref).
+- **Supersedes WE-61 in part** — save-as-superset selector renders only on
+  2+ ex supersets and lives at the top of the card, not the bottom.
 - **New rules needed:**
   - Builder layout (the 4-item blank state above)
   - Muscle-group derivation from exercises (replaces chip-grid
@@ -205,7 +225,7 @@ Per CLAUDE.md §7 (d) park disposition.
 
 ## Phase 1B known issues — phone testing
 
-### `+ SAVE SUPERSET` button on singleton supersets reads as misleading (2026-06-07)
+### ~~`+ SAVE SUPERSET` button on singleton supersets reads as misleading (2026-06-07)~~ — resolution locked-in via Rev 11 (selector renders only on 2+ ex supersets, top-positioned). Original entry retained below for context.
 
 Reported during 2026-06-07 phone test of Rev 10 step 5:
 

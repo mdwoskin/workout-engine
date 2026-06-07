@@ -81,7 +81,7 @@ Per WE-40:
 
 - ✓ **Phase 0** — Rules Doc v1.3
 - ✓ **Phase 1** — Visual prototype, Rev 1–9 (deployed 2026-05-15)
-- ⏳ **Phase 1B** — Rev 10 build (spec'd in WE-57 through WE-63). Step 1 of 8 shipped in `acc51e6` (WE-57 two-tap remove + WE-58 cluster scaffold); 7 steps remain. See `HANDOFF.md` for the live plan.
+- ✓ **Phase 1B** — Rev 10 complete (WE-57 through WE-63), tagged `we-v1.2` (2026-06-07). Teal/dark palette refresh shipped alongside. Rev 11 (Builder UX overhaul) spec'd in `OUTSTANDING_ITEMS.md`; rules-doc bump to `v1.4` lands first.
 - ☐ Phase 2 — Exercise library + filter
 - ☐ Phase 3 — IndexedDB schema + seed
 - ☐ Phase 4 — Shadow population + history queries
