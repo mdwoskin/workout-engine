@@ -7,10 +7,13 @@ editing code on a new machine. Update as part of every commit per WE-46.
 
 ## Last updated
 
-- **Build-state commit:** `<pending>` — Rev 10 step 5 (WE-62 Saved Library
-  screen, in-memory). Local only; push pending.
-- **HANDOFF.md last edit:** 2026-06-07, ASUS session (step 5 ship —
-  WE-62 Saved Library screen lands; phone-test review gate next).
+- **Build-state commit:** `f85215d` — Rev 10 step 5 (WE-62 Saved Library
+  screen, in-memory). Pushed to `origin/main`.
+- **HANDOFF.md last edit:** 2026-06-07, ASUS session (session wrap —
+  step 5 hash backfilled; step 5 sign-off `(a) all kept` per CLAUDE.md
+  §7; one mid-test bug found + fixed in the same commit per (b) revise
+  — `hydrateInsertedEx` placeholder injection so saved-template Use
+  doesn't crash on `ex.sets.forEach`).
 
 ---
 
@@ -64,8 +67,7 @@ uncommitted work present), **stop and reconcile before starting step 6.**
   cards with preview + ▶ Use + ✕ Delete, in-memory; `useCount` added to
   saved-template schema and bumps on Use. **3 of 8 Rev 10 steps remain.**
 - `we-v1.1` annotated tag landed retroactively on `bc095cc` (Phase 1 deploy
-  point per WE-42).
-- Local `main` is one commit ahead of `origin/main` until the step 5 push.
+  point per WE-42). `we-v1.2` lands at step 7 after WE-63.
 
 ---
 
