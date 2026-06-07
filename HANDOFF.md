@@ -23,7 +23,7 @@ In this order:
 
 1. `CLAUDE.md` — project instructions, working preferences, don'ts, workflow
    rules (§7).
-2. `Workout_Engine_Rules_v1.3.md` — authoritative spec, 63 rules across 10
+2. `Workout_Engine_Rules_v1.4.md` — authoritative spec, 69 rules across 11
    Parts. Engine prefix: `WE`.
 3. Latest `CHANGELOG.md` entry — current top entry is **Phase 1B Rev 10
    step 1** (2026-05-15).

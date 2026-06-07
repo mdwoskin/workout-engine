@@ -5,7 +5,7 @@ As of 2026-05-15.
 ## Immediate next steps (priority order)
 
 ### 1. Build Rev 10 in code
-Rev 10 spec is captured in WE-57 through WE-63 of `Workout_Engine_Rules_v1.3.md`. In progress on Phase 1B.
+Rev 10 spec was captured in WE-57 through WE-63 of `Workout_Engine_Rules_v1.3.md`; shipped at `we-v1.2` (+ WE-63 case fix `3d9b2ca`). v1.4 of the rules doc supersedes WE-57/58 and modifies WE-15/31/55/61/63 for Rev 11. Section retained for historical scope context.
 
 Starting point: current `index.html` (Phase 1 Rev 9). Apply these deltas:
 
@@ -383,7 +383,7 @@ Cardio block UI for logging not fully mocked through Rev 9. Deferred to Phase 5 
 
 ## Spec hygiene
 
-- **Add WE-N tag to the 15-iteration rule.** Currently lives in the unnumbered Versioning Protocol preamble of `Workout_Engine_Rules_v1.3.md`. **Trigger:** fold into the v1.4 rules-doc bump that ships after Rev 10.
+- ~~**Add WE-N tag to the 15-iteration rule.**~~ Resolved in v1.4 — promoted to WE-47 (was "Reserved" in v1.3). Versioning Protocol preamble now cross-references WE-47.
 
 ## v2 candidates
 

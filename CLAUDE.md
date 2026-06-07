@@ -42,7 +42,7 @@ How I want you to communicate:
 ## 3. Engineering Conventions (from Rules Doc v1.3)
 
 These rules govern every change. Read the full text in
-`Workout_Engine_Rules_v1.3.md` — citations below.
+`Workout_Engine_Rules_v1.4.md` — citations below.
 
 - **WE-45 — Commit prefix.** All commits begin with `WE:` or `WE-N:` where N is
   the relevant rule number. Examples: `WE: Phase 1 Rev 9 initial import`,
@@ -63,7 +63,7 @@ These rules govern every change. Read the full text in
 
 | File | Status | Role |
 |---|---|---|
-| `Workout_Engine_Rules_v1.3.md` | committed | **Authoritative spec.** 63 rules across 10 Parts. Read before any non-trivial change. |
+| `Workout_Engine_Rules_v1.4.md` | committed | **Authoritative spec.** 69 rules across 11 Parts. Read before any non-trivial change. Part 11 (WE-64–69) is the Rev 11 Builder redesign; WE-57/58 fully rewritten in v1.4 (superseded the v1.3 two-tap remove + cluster). |
 | `index.html` | committed | **Current code.** Phase 1 Rev 9 visual prototype. Single source of truth for what works today. |
 | `CHANGELOG.md` | committed | One entry per iteration per WE-46. Append top entries; don't edit historical ones. |
 | `OUTSTANDING_ITEMS.md` | committed | Live working list. Open questions, deferred items, spec hygiene. Items resolve individually; not aged out wholesale. |

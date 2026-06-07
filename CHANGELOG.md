@@ -4,6 +4,34 @@ Chronological build log. Each rev = a deliverable in chat.
 
 ---
 
+## Rules doc bump v1.3 → v1.4 — Rev 11 spec — 2026-06-07
+**Status: committed locally, push pending**
+
+- File renamed `Workout_Engine_Rules_v1.3.md` → `Workout_Engine_Rules_v1.4.md` via `git mv` so history follows
+- Header: Version → v1.4, status note describing Rev 11 spec landing post-`we-v1.2` ship, Last updated → 2026-06-07
+- Rules-Doc Changelog gains a v1.4 row enumerating what's modified, replaced, and added
+- Document Structure adds **Part 11 — Rev 11 Builder Redesign (WE-64 to WE-69)**
+- **In-place edits to existing rules:**
+  - **WE-15** (Builder uses Build/Recommendations split) → "Builder section layout (Rev 11+)" — recs leave the Builder; section action buttons reduced to `+ ADD EXERCISE` (with recs inline per WE-66) and `+ SAVED SUPERSET`
+  - **WE-31** (Add Exercise picker accordion rows) → picker gains inline recs alongside the exercise list; v1.3 "Start new superset / Add to current" toggle replaced by the WE-66 follow-up modal
+  - **WE-47** (Reserved → "New thread at every 15 build iterations") — promoted out of the Versioning Protocol preamble per the OUTSTANDING spec hygiene item, which is now struck
+  - **WE-55** (Builder Build/Recommendations split spec) → "Builder Build visual treatment" — recs half dropped; `yellow accent` description superseded by the 2026-06-07 teal palette refresh
+  - **WE-57** (Two-tap remove) → fully rewritten as swipe-to-delete (two-stage swipe gesture, outside-tap collapse, mutual exclusion, cardio block swipes too)
+  - **WE-58** (Action cluster `↑ ↓ ⤴ ⤵ ⊖`) → fully rewritten as three-state model (singleton-alone all-grey / singleton-with-peers merge-icon→modal / in-superset `↑`/`↓`/breakout). `⤵` merge-down icon dropped entirely; merging now driven by WE-67 modal flow. Empty-superset placeholders gone — `+ NEW SUPERSET` was a v1.3 affordance that doesn't exist in Rev 11
+  - **WE-61** (Save Superset structure only) → selector top-positioned; renders only on 2+ ex supersets (singletons get nothing); `section_group` replaced by exercise-derived `[GROUP]` per WE-63 v1.4 superset rule
+  - **WE-63** (Save auto-name) → Title Case throughout (was uppercase in v1.3); superset `[GROUP]` derivation moved from "section the superset lived in" to "exercises within the superset, first primary + `/` + disparate mgs in add-order"
+- **New rules (Part 11):**
+  - **WE-64** Builder top-level layout — chip grid + pairing blurb + `+ SAVED WORKOUT` + `▶ START NOW`; `+ SAVE WORKOUT` lives at top of build area when non-empty
+  - **WE-65** Cardio chip default-selected + pinned-top section, re-pins on re-add
+  - **WE-66** `+ ADD EXERCISE` flow — picker with inline recs + "where does this go?" follow-up modal when section already has supersets
+  - **WE-67** Merge-icon modal chooser — triggered from WE-58 singleton-with-peers state, modal lists same-mg supersets + `+ NEW SUPERSET`
+  - **WE-68** `+ SAVED WORKOUT` overwrites current build (no merge); matches existing `▶ Use` workout clobber semantics
+  - **WE-69** iPhone long-press drag-to-group — touch-native version of WE-67 modal; Phase 7 deferred but spec'd here for forward reference so WE-67's MVP build doesn't paint into a corner
+- **Appendix B (Plan Builder)** rewritten to reflect Rev 11 layout: chip grid + workout-level Save/Start at top, cardio pinned, three-state cluster per WE-58 v1.4, swipe-to-delete per WE-57 v1.4, save-as-superset at top of 2+ ex supersets only
+- **End-of-doc marker** updated from "END OF v1.3" + Rev 10 next-iteration note → "END OF v1.4" + Rev 11 next-iteration note
+- **Repo touches:** CLAUDE.md §4 file layout row points to v1.4 (rule count 69, parts 11); HANDOFF.md read-first list points to v1.4 (matching rule + part counts); OUTSTANDING_ITEMS section 1 reference updated to historical context; spec hygiene item on the 15-iteration WE-N promotion struck
+- Doc-only change. No `index.html` touch. No code behavior change yet — Rev 11 code work follows in a later commit cycle
+
 ## WE-63 case fix — Title Case — 2026-06-07
 **Status: committed locally, push pending**
 
