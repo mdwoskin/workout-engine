@@ -4,6 +4,20 @@ Chronological build log. Each rev = a deliverable in chat.
 
 ---
 
+## Phase 1B Rev 10 step 6 — WE-63 auto-name logic — 2026-06-07
+**Status: committed locally, push pending**
+
+- WE-63: Save Workout + Save Superset prompts now default to `Custom [GROUP] [Type] #N`. `[GROUP]` is the uppercase mg display name(s); multi-group workouts join with `/` (e.g. `Custom BACK/BICEPS Workout #3`); supersets use the section's mg. `[Type]` is `Workout` or `Superset`
+- **`[GROUP]` derived from sections that actually have exercises**, NOT raw `selectedMG`. Selecting `Back + Biceps` but only adding back exercises yields `Custom BACK Workout #N`. The Save Workout handler now builds the `sections` object first, then derives `[GROUP]` from `Object.keys(sections)`. Sign-off-item-worthy: it'd be reasonable to argue raw `selectedMG` is the right source (user-intent-driven), but sections-driven matches the actual saved structure
+- "Lowest available N" via new `lowestAvailableAutoNameN(items, baseName)` helper — scans `items` for entries with `isAutoNamed: true` AND `name.startsWith(baseName + ' #')`, extracts the numeric suffix, returns the smallest positive integer not in the used set. Gap-fill semantics: deleting an auto-named #2 means the next auto-save in that `[GROUP] [Type]` family picks #2, not #4
+- Schema: both `savedWorkouts` and `savedSupersets` gain an `isAutoNamed: boolean` field. Set true when the final saved name equals the prompt default; false when the user typed anything different. User-edited names that happen to match the auto-name format (e.g., user types `Custom BACK Workout #99`) are treated as user-named and do NOT reserve slot #99 — matches WE-63's "user-edited names don't poison" intent
+- Helper `autoNameGroupKey(mgs)` consolidates the uppercase-join logic so Save Workout (multi-mg) and Save Superset (single mg) share the same derivation
+- Counter rename: `savedWorkoutSeq` → `nextSavedWorkoutId`, `savedSupersetSeq` → `nextSavedSupersetId`. They no longer carry naming semantics (just monotonic id assignment); the rename + comment update makes the intent obvious to anyone reading the state declarations
+- Existing prompt mechanic preserved — cancel aborts, empty/whitespace falls back to the default (which is now the WE-63 string, so empty input auto-names per spec)
+- No screen / CSS / UX changes. No `buildState` changes. No Saved Library render changes — the card just shows `item.name` regardless of source, which is correct
+- HANDOFF.md updated: step 6 marked DONE, NEXT → step 7 (CHANGELOG + CLAUDE.md updates + `we-v1.2` tag)
+- OUTSTANDING_ITEMS.md: WE-63 line struck
+
 ## Palette refresh — teal/dark — 2026-06-07
 **Status: committed locally, push pending**
 

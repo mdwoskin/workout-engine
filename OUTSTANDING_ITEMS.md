@@ -15,7 +15,7 @@ Starting point: current `index.html` (Phase 1 Rev 9). Apply these deltas:
 - ~~**Save Workout button** in Builder action bar (WE-60). Structure only.~~ Shipped in step 4 — `+ SAVE WORKOUT` at the bottom of `#sections-area` when build is non-empty; structure-only; `prompt()` with auto-stub default.
 - ~~**Save Superset button** at bottom of each superset card (WE-61). Structure only.~~ Shipped in step 4 — small `+ SAVE SUPERSET` inline button per non-empty, non-cardio superset; same naming flow.
 - ~~**Saved Library screen** (WE-62)~~ — shipped in Rev 10 step 5. New `screen-saved-library` with WORKOUTS/SUPERSETS toggle. Home `📋 SAVED TEMPLATES` entry point + per-section Builder `📋 INSERT SAVED SUPERSET` (non-cardio). Cards show name, date, ex count, use count, structure preview, `▶ Use` + `✕ Delete`. Sort by `savedAt` desc. `useCount` field added to schema. `▶ Use` on workout clobbers `buildState`; on superset (only from Builder context) appends to that section.
-- **Auto-name logic** (WE-63): `Custom [GROUP] [Type] #N`; multi-group workouts join with `/`; supersets use section context; "lowest available N" rule via `is_auto_named` flag.
+- ~~**Auto-name logic** (WE-63)~~ — shipped in Rev 10 step 6. `Custom [GROUP] [Type] #N` with [GROUP] uppercase, joined with `/` for multi-mg workouts. Workouts derive [GROUP] from sections that actually have exercises (not raw selectedMG). `#N` = lowest available via `lowestAvailableAutoNameN` helper, scanning only entries with `isAutoNamed: true`. User-edited names get `isAutoNamed: false` and don't reserve slots — supports gap-fill on delete.
 - ~~**Side effects** (WE-15, WE-57, WE-58)~~ — shipped in step 1 (empty-superset auto-delete + pulled-rec re-enable).
 
 ### 2. Phase 2: Exercise library + filter wiring

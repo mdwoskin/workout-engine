@@ -793,18 +793,40 @@
   // Keyed by muscle group; Set of recommendation indices that have been pulled
   const pulledRecs = {};
 
-  // ===== WE-60 / WE-61 / WE-62 saved templates (Phase 1B in-memory) =====
+  // ===== WE-60 / WE-61 / WE-62 / WE-63 saved templates (Phase 1B in-memory) =====
   // Structure only — no weights/reps, just the exercise identity per WE-60.
   // Phase 1B placeholder: held in JS memory; cleared on reload. Phase 3 (Dexie)
   // wires the saved_workouts / saved_supersets stores from WE-34.
-  // Names default to "Custom Workout #N" / "Custom Superset #N" via the save
-  // prompt; user edits inline. WE-63 (step 6) replaces the default with the
-  // full auto-name format `Custom [GROUP] [Type] #N`.
+  // WE-63 auto-name: `Custom [GROUP] [Type] #N` (group uppercase, multi-group joined
+  // with `/`). #N is the lowest available positive integer for that [GROUP] [Type]
+  // key, scanning only entries with isAutoNamed: true so user-edited names don't
+  // poison the auto-name space. User can override the default in the prompt; the
+  // saved entry records isAutoNamed=false when the user typed something different.
   // useCount: increments on each ▶ Use from the Saved Library (WE-62).
-  const savedWorkouts = [];     // [{ id, name, savedAt, useCount, sections: { [mg]: [{ exs }] } }]
-  const savedSupersets = [];    // [{ id, name, savedAt, useCount, sectionMg, exs }]
-  let savedWorkoutSeq = 1;      // next #N for the workout auto-name stub
-  let savedSupersetSeq = 1;     // next #N for the superset auto-name stub
+  const savedWorkouts = [];     // [{ id, name, isAutoNamed, savedAt, useCount, sections: { [mg]: [{ exs }] } }]
+  const savedSupersets = [];    // [{ id, name, isAutoNamed, savedAt, useCount, sectionMg, exs }]
+  let nextSavedWorkoutId = 1;   // monotonic id counter (no longer carries name semantics — see WE-63)
+  let nextSavedSupersetId = 1;  // monotonic id counter
+
+  function autoNameGroupKey(mgs) {
+    // Per WE-63: uppercase mg display names joined with `/`. Order = iteration order
+    // (insertion order for selectedMG; single mg for supersets).
+    return mgs.map(mg => (mgNames[mg] || mg).toUpperCase()).join('/');
+  }
+  function lowestAvailableAutoNameN(items, baseName) {
+    // "Lowest available N" per WE-63 — gap-fill semantics. Only auto-named entries
+    // reserve slots; user-edited names are invisible to this scan.
+    const prefix = baseName + ' #';
+    const used = new Set();
+    items.forEach(it => {
+      if (!it.isAutoNamed || !it.name || !it.name.startsWith(prefix)) return;
+      const n = parseInt(it.name.substring(prefix.length));
+      if (Number.isInteger(n) && n > 0) used.add(n);
+    });
+    let n = 1;
+    while (used.has(n)) n++;
+    return n;
+  }
 
   function ensureBuildState() {
     Array.from(selectedMG).forEach(mg => {
@@ -1121,16 +1143,17 @@
         }
       });
     });
-    // WE-60: Save Workout — copy buildState (structure only — no weights/reps/origins)
-    // into savedWorkouts. Default name is "Custom Workout #N"; user can edit in the
-    // prompt. Cancel aborts; empty/whitespace falls back to the default. Empty
-    // placeholder supersets are dropped from the saved structure.
+    // WE-60 + WE-63: Save Workout — copy buildState (structure only — no weights/
+    // reps/origins) into savedWorkouts. WE-63 default name is
+    // `Custom [GROUP] [Type] #N` where [GROUP] is the uppercase mg(s) actually
+    // populated (sections.keys, NOT raw selectedMG — selecting back+biceps but
+    // only adding back exercises yields a `BACK` workout, not `BACK/BICEPS`).
+    // Cancel aborts; empty/whitespace falls back to the default. The saved entry
+    // records isAutoNamed=true when the final name equals the default; false when
+    // the user typed something different (which then doesn't reserve an auto-name
+    // slot per WE-63).
     area.querySelectorAll('[data-save-workout]').forEach(btn => {
       btn.addEventListener('click', () => {
-        const defaultName = `Custom Workout #${savedWorkoutSeq}`;
-        const input = prompt('Name this workout:', defaultName);
-        if (input === null) return;
-        const name = input.trim() || defaultName;
         const sections = {};
         Array.from(selectedMG).forEach(mg => {
           const supersets = (buildState[mg] || []).filter(ss => ss.exs.length > 0);
@@ -1140,13 +1163,22 @@
             }));
           }
         });
-        savedWorkouts.push({ id: savedWorkoutSeq, name, savedAt: new Date().toISOString(), useCount: 0, sections });
-        savedWorkoutSeq++;
+        const groupKey = autoNameGroupKey(Object.keys(sections));
+        const baseName = `Custom ${groupKey} Workout`;
+        const autoN = lowestAvailableAutoNameN(savedWorkouts, baseName);
+        const defaultName = `${baseName} #${autoN}`;
+        const input = prompt('Name this workout:', defaultName);
+        if (input === null) return;
+        const name = input.trim() || defaultName;
+        const isAutoNamed = name === defaultName;
+        savedWorkouts.push({ id: nextSavedWorkoutId, name, isAutoNamed, savedAt: new Date().toISOString(), useCount: 0, sections });
+        nextSavedWorkoutId++;
         toast(`Saved workout: ${name}`);
       });
     });
-    // WE-61: Save Superset — copy a single superset's exercises (structure only)
-    // into savedSupersets. Same naming behavior as Save Workout.
+    // WE-61 + WE-63: Save Superset — copy a single superset's exercises (structure
+    // only) into savedSupersets. WE-63 default name uses the section's mg as
+    // [GROUP] (single mg, uppercase). Same isAutoNamed tracking as Save Workout.
     area.querySelectorAll('[data-save-superset]').forEach(btn => {
       btn.addEventListener('click', (e) => {
         e.stopPropagation();
@@ -1154,19 +1186,24 @@
         const ssIdx = parseInt(ssIdxStr);
         const ss = buildState[mg] && buildState[mg][ssIdx];
         if (!ss || ss.exs.length === 0) return;
-        const defaultName = `Custom Superset #${savedSupersetSeq}`;
+        const groupKey = autoNameGroupKey([mg]);
+        const baseName = `Custom ${groupKey} Superset`;
+        const autoN = lowestAvailableAutoNameN(savedSupersets, baseName);
+        const defaultName = `${baseName} #${autoN}`;
         const input = prompt('Name this superset:', defaultName);
         if (input === null) return;
         const name = input.trim() || defaultName;
+        const isAutoNamed = name === defaultName;
         savedSupersets.push({
-          id: savedSupersetSeq,
+          id: nextSavedSupersetId,
           name,
+          isAutoNamed,
           savedAt: new Date().toISOString(),
           useCount: 0,
           sectionMg: mg,
           exs: ss.exs.map(ex => ({ name: ex.name, primary: ex.primary }))
         });
-        savedSupersetSeq++;
+        nextSavedSupersetId++;
         toast(`Saved superset: ${name}`);
       });
     });

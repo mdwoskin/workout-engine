@@ -7,13 +7,11 @@ editing code on a new machine. Update as part of every commit per WE-46.
 
 ## Last updated
 
-- **Build-state commit:** `f85215d` — Rev 10 step 5 (WE-62 Saved Library
-  screen, in-memory). Pushed to `origin/main`.
-- **HANDOFF.md last edit:** 2026-06-07, ASUS session (session wrap —
-  step 5 hash backfilled; step 5 sign-off `(a) all kept` per CLAUDE.md
-  §7; one mid-test bug found + fixed in the same commit per (b) revise
-  — `hydrateInsertedEx` placeholder injection so saved-template Use
-  doesn't crash on `ex.sets.forEach`).
+- **Build-state commit:** `<pending>` — Rev 10 step 6 (WE-63 auto-name
+  logic). Local only; push pending.
+- **HANDOFF.md last edit:** 2026-06-07, ASUS session (step 6 ship —
+  WE-63 auto-name `Custom [GROUP] [Type] #N` with lowest-available-N
+  gap-fill via `isAutoNamed` flag).
 
 ---
 
@@ -58,16 +56,21 @@ uncommitted work present), **stop and reconcile before starting step 6.**
 ## Current state
 
 - ✓ Phase 1 deployed via GitHub Pages (2026-05-15).
-- ⏳ **Phase 1B Rev 10 in progress.** Steps 1–5 shipped. Step 1
+- ⏳ **Phase 1B Rev 10 in progress.** Steps 1–6 shipped. Step 1
   (`acc51e6`): WE-57 + WE-58 cluster scaffold. Step 2 (`35a0031`): WE-58
   within-section move logic. Step 3 (`ec6bcb4`): WE-59 primary-group tag
   (Builder only). Step 4 (`fa4b870`): WE-60 + WE-61 save buttons —
   in-memory `savedWorkouts` / `savedSupersets`; structure-only. Step 5
-  (this commit): WE-62 Saved Library screen — WORKOUTS/SUPERSETS toggle,
-  cards with preview + ▶ Use + ✕ Delete, in-memory; `useCount` added to
-  saved-template schema and bumps on Use. **3 of 8 Rev 10 steps remain.**
+  (`f85215d`): WE-62 Saved Library screen with WORKOUTS/SUPERSETS toggle,
+  card preview, ▶ Use, ✕ Delete; `useCount` added to schema. Palette
+  refresh (`bee5c6a`, teal/dark) landed between steps 5 and 6, pure
+  visual swap. Step 6 (this commit): WE-63 auto-name
+  `Custom [GROUP] [Type] #N` with lowest-available-N gap-fill scoped per
+  `[GROUP] [Type]` key; `isAutoNamed` schema field added so user-edited
+  names don't poison the auto-name space. **2 of 8 Rev 10 steps remain
+  (step 7 changelog/tag + step 8 push).**
 - `we-v1.1` annotated tag landed retroactively on `bc095cc` (Phase 1 deploy
-  point per WE-42). `we-v1.2` lands at step 7 after WE-63.
+  point per WE-42). `we-v1.2` lands at step 7.
 
 ---
 
@@ -96,7 +99,7 @@ Locked in prior session. Do not reorder without explicit OK.
    auto-stub default name; cancel aborts; empty/whitespace falls back to
    default. Sign-off 2026-05-17: 9 items defaulted to `(a) keep all` per
    CLAUDE.md §7 (user dispositioned by silence; nothing parked).
-5. ✓ **WE-62 Saved Library screen** — DONE (this commit). New
+5. ✓ **WE-62 Saved Library screen** (`f85215d`). New
    `screen-saved-library` with WORKOUTS/SUPERSETS toggle. Cards show
    name, date, ex count, use count, structure preview, `▶ Use` and
    `✕ Delete`. Sort by `savedAt` desc. Empty states per mode (and
@@ -106,38 +109,45 @@ Locked in prior session. Do not reorder without explicit OK.
    switches to Builder (matches `+ Pull in` replace semantics). `▶ Use`
    on a superset is enabled only when arrived from a Builder section;
    appends to that section. Both bump `useCount`. `✕ Delete` removes
-   in-memory and toasts (no undo). Schema: `savedWorkouts` /
-   `savedSupersets` gained a `useCount` field (already in
-   index.html:767 comment).
-6. ⏭️ **NEXT — WE-63 auto-name logic.** Phone-test review gate cleared
-   here: review step 5 on the phone before starting step 6.
-7. ☐ CHANGELOG + CLAUDE.md updates; tag `we-v1.2`.
+   in-memory and toasts (no undo). Sign-off 2026-06-07: (a) all kept;
+   one mid-test bug (`ex.sets.forEach` on saved-template Use) fixed in
+   same commit per (b) revise via `hydrateInsertedEx`.
+6. ✓ **WE-63 auto-name logic** — DONE (this commit). Save Workout +
+   Save Superset prompts default to `Custom [GROUP] [Type] #N` where
+   `[GROUP]` is uppercase mg display name(s) joined with `/`. Workouts
+   derive `[GROUP]` from `sections.keys()` (only mgs with actual
+   exercises, not raw `selectedMG` — selecting `Back+Biceps` but only
+   adding back exercises yields `Custom BACK Workout #N`, not
+   `Custom BACK/BICEPS Workout #N`). Supersets use the section's mg.
+   `#N` = lowest available positive integer via
+   `lowestAvailableAutoNameN`, scanning only entries with
+   `isAutoNamed: true`. User-edited names get `isAutoNamed: false` and
+   don't reserve slots — so gap-fill works (deleting an auto-named #2
+   means the next auto-save picks #2, not #4). Counters renamed:
+   `savedWorkoutSeq` / `savedSupersetSeq` → `nextSavedWorkoutId` /
+   `nextSavedSupersetId` (id role only, no name semantics).
+7. ⏭️ **NEXT — CHANGELOG + CLAUDE.md updates; tag `we-v1.2`.**
 8. ☐ Push + verify GH Pages deploy.
 
 ---
 
 ## Next step
 
-**Step 6 — WE-63 auto-name logic.**
+**Step 7 — CHANGELOG + CLAUDE.md updates; tag `we-v1.2`.**
 
-Scope (per Workout_Engine_Rules_v1.3.md WE-63):
+Scope:
 
-- Replace the `Custom Workout #N` / `Custom Superset #N` stubs in the
-  Save prompts with the full auto-name format `Custom [GROUP] [Type] #N`.
-- Workouts: `[GROUP]` derives from selected mgs (multi-group joined with
-  `/`, e.g. `Custom Back/Biceps Workout #3`); `[Type]` = `Workout`.
-- Supersets: `[GROUP]` from the section the save was triggered in;
-  `[Type]` = `Superset`.
-- `#N` follows the "lowest available N" rule per WE-63, scoped per
-  `[GROUP] [Type]` combination, tracked via an `is_auto_named` flag so
-  user-edited names don't poison the auto-name space.
-- No screen changes — touches the two prompt defaults and the
-  `savedWorkoutSeq` / `savedSupersetSeq` counters (replace flat counters
-  with per-key lookups).
-
-Phone-test review gate at step 5 — review the new Saved Library screen
-on the phone before starting step 6. Flag any visual or interaction
-nits in the sign-off; park if not blocking.
+- `CHANGELOG.md` — step 6 entry already landed in this commit; step 7
+  rolls up the Rev 10 summary entry under the cumulative tag heading,
+  noting WE-57 through WE-63 + the palette refresh that landed between
+  steps 5 and 6.
+- `CLAUDE.md` — bump §5 "Build Phase Status" Phase 1B line from
+  "Step 1 of 8 shipped" to "Rev 10 complete (we-v1.2)"; refresh
+  Phase 2 entry if any framing changed.
+- `git tag -a we-v1.2 -m "Rev 10 complete (WE-57 through WE-63)"`
+  pointing at HEAD per WE-42.
+- Phone-test gate before push at step 8 — sanity-check the tagged
+  build via local serve OR after the step 8 push via GH Pages.
 
 ---
 
