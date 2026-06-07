@@ -4,6 +4,16 @@ Chronological build log. Each rev = a deliverable in chat.
 
 ---
 
+## Palette refresh — teal/dark — 2026-06-07
+**Status: committed locally, push pending**
+
+- New CSS variables in `:root` per the OUTSTANDING_ITEMS "## Palette" spec (approved 2026-06-07): `--bg: #0A0F0E` (deepest teal-dark page bg); `--bg-1` / `--bg-2`: `#1C2725` (flat surface/surf_el per spec); `--bg-3`: `#243330` (derived micro-surface); `--border`: `#243330` (matches bg-3) / `--border-hi`: `#2D4543` (derived); `--accent`: `#1F8A7E` (`accent`/`data`); `--accent-dim`: `#216F66` (txt_s repurposed — no dim-accent token in spec); `--ok`: `#1F8A7E` (= accent per spec's flat success); `--danger`: `#B14646` (destruct)
+- **Text mapping non-literal** — spec's `txt_p: #1F8A7E` would collide with accent and fail AA contrast on the new bg, so per the recommendation accepted at decision time, `--text` uses `chart_lo` (`#B1E2DC`, ~10:1 on bg), `--text-dim` uses `chart_hi` (`#76DACE`, ~6.5:1), `--text-faint` uses `txt_s` (`#216F66`). Code comment in `:root` flags the deviation so a future v2 pass knows why
+- 18 hardcoded hex literals in the SVG chart rendering (weight line + dots, reps bars, grid lines, axis labels) swapped to the new palette. Weight + reps series now both render `#1F8A7E`; shape (line vs. bars) carries the distinction that color previously did
+- `--pair-good` / `--pair-bad` updated for theme consistency though both are currently unused (`.chip.pair-good` references `--accent-dim` and `.chip.pair-bad` is opacity-only). Left in `:root` for future use; not pulled out as a separate cleanup
+- No JS / functional / UX changes — pure visual swap. Phone-tested 2026-06-07; approved as "perfect for now, fine tune later"
+- OUTSTANDING_ITEMS.md "## Palette" section marked SHIPPED with cross-reference to this entry
+
 ## Phase 1B Rev 10 step 5 — Saved Library screen (in-memory) — 2026-06-07
 **Status: committed locally, push pending**
 

@@ -132,6 +132,8 @@ from the rules above.
 
 ## Palette
 
+**SHIPPED 2026-06-07** — see CHANGELOG entry "Palette refresh — teal/dark". Spec retained below as v2-fine-tune reference; sub-bullets on flat tokens (`success`/`accent`, `surface`/`surf_el`) and the non-literal text mapping noted in the CHANGELOG remain open for a future palette pass.
+
 **Palette refresh — "Teal/dark" (approved 2026-06-07)**
 
 Tokens to apply across `index.html` when palette refresh ships:
