@@ -44,67 +44,96 @@ Starting point: current `index.html` (Phase 1 Rev 9). Apply these deltas:
 
 ## Rev 11 — Builder UX overhaul (proposal, locked-in 2026-06-07)
 
-Substantial Builder redesign surfaced during 2026-06-07 phone test
-sign-off for Rev 10 step 5. **Trigger to start: after Rev 10 ships
-`we-v1.2`** (steps 6 WE-63 → 7 changelog/tag → 8 push). Begins with a
-rules-doc bump to `v1.4` since several Rev 10 rules are superseded.
+Substantial Builder redesign surfaced during 2026-06-07 phone-test
+sign-off for Rev 10 step 5 and refined through the same day's
+session. **Trigger to start:** Rev 10 has shipped (`we-v1.2` +
+WE-63 case fix `3d9b2ca`); Rev 11 begins with a rules-doc bump to
+`v1.4` since several Rev 10 rules are superseded.
 
 ### Locked-in design decisions
 
-- **Muscle-group derivation** — chip grid goes away. The workout's
-  group emerges from added exercises: first exercise's `primary` is
-  the workout's primary group; if a later exercise has a different
-  `primary`, append `/ [Group2]`. WE-63 auto-name `[GROUP]` token
-  derives from this. Resolves what would otherwise have been a
-  blocker for the new flow.
-- **Recommendations area** — removed from the Builder (no longer
-  pinned below the muscle group). **New location: inside the
-  `+ ADD EXERCISE` picker modal** — recs from history surface in the
-  picker alongside the full exercise list, so they only appear when
-  the user is actively choosing what to add. (Future v3 also surfaces
-  recs on Home tab based on typical workout sequencing — out of scope
-  for Rev 11.) Refined 2026-06-07.
-- **`+ ADD CARDIO`** — pinned to the top of the build area as its own
-  always-present section (not chip-derived). Cardio's parameters
-  (incline, speed, distance vs. reps/weight) justify a distinct UI
-  treatment from strength supersets. Swipe-to-remove like any other
-  block.
-- **`+ ADD SAVED SUPERSET` vs. the existing Saved Library** — mirror
-  each other initially (both route to the full Saved Library screen).
-  Pare down to a slimmer in-Builder picker later if the full screen
-  feels too heavy.
-- **`+ ADD EXERCISE`** — only ever adds individual exercises. Group
-  membership is decided in a follow-up modal (see below). The
-  `+ ADD SAVED SUPERSET` button is the only path for inserting a
-  pre-built group.
+- **Chip grid stays** — WE-30 unchanged. User picks muscle groups at
+  the top of Builder as today; sections appear per chip selection;
+  pair-emphasis logic preserved. (Earlier draft of this entry said
+  the chip grid went away — that was a misread of the user's
+  exercise-derivation answer, which actually applies to superset
+  naming, not workout-level group selection. Corrected 2026-06-07.)
+- **Cardio chip is default-selected and pinned top** — Builder
+  initialises with `cardio` already in `selectedMG`. The cardio
+  section renders pinned at the top of the build area. If the user
+  removes the cardio chip and later re-adds it, the cardio section
+  re-pins to the top. Cardio's distinct parameters (incline, speed,
+  distance vs. reps/weight) justify the dedicated treatment.
+- **Recommendations leave the Builder** — no longer pinned below
+  each muscle-group section. **New location: inside the `+ ADD
+  EXERCISE` picker modal** — recs from history surface alongside the
+  full exercise list. Recs only render when the user is actively
+  choosing what to add. (Future v3 also surfaces recs on Home tab
+  based on typical workout sequencing — out of scope for Rev 11.)
+- **`+ ADD EXERCISE`** — adds individual exercises only. When the
+  section already has supersets, a follow-up modal asks "where does
+  this go?" with the existing supersets + `+ NEW SUPERSET` as options
+  (see Behaviors). The `+ SAVED SUPERSET` button is the only path for
+  inserting a pre-built group.
+- **`+ SAVED SUPERSET` per section, `+ SAVED WORKOUT` workout-level.**
+  `+ SAVED SUPERSET` lives inside each muscle-group section. The
+  workout-level `+ SAVED WORKOUT` button sits at the top of the
+  Builder tab, **distinct from `▶ START NOW`** (Save = load template
+  into Builder for amending; Start = use the current build as a live
+  workout). Tapping `+ SAVED WORKOUT` and selecting an entry
+  **overwrites the current build** entirely (matches today's `▶ Use`
+  workout clobber semantics). User can then amend (sets/reps/add
+  more exercises/supersets) before starting.
+- **Auto-name (revises WE-63 superset rule):**
+  - **Workouts** — `Custom [GROUP] Workout #N`. `[GROUP]` = sections
+    that actually have exercises, **Title Case**, `/`-joined.
+    Already shipped post-`we-v1.2` case fix (`3d9b2ca`); no change
+    needed in Rev 11.
+  - **Supersets** — `Custom [GROUP] Superset #N`. `[GROUP]` derives
+    from **exercises within the superset** (first exercise's primary
+    mg, then `/` + disparate mgs in add-order), Title Case. **This
+    is a behaviour change to shipped Rev 10 step 6 code**, which
+    currently uses the section's mg. Rev 11 switches to exercise-
+    derived. Single-mg superset → `Custom Back Superset #N`; mixed
+    → `Custom Back/Biceps Superset #N`.
 
-### Initial Builder layout (blank state)
+### Initial Builder layout
 
-Top to bottom:
+Top of Builder tab → down:
 
-1. `📋 INSERT SAVED TEMPLATE` (Saved Library entry — workouts mode)
-2. `+ ADD CARDIO` — pinned-top, always present
-3. `+ ADD EXERCISE` — singles only
-4. `+ ADD SAVED SUPERSET` — own box, separate from the singles flow
+1. **Chip grid + pair blurb** (WE-30, unchanged). `cardio` chip is
+   default-selected.
+2. **`+ SAVED WORKOUT`** — workout-level button. Overwrites build on
+   selection.
+3. **`▶ START NOW`** — uses the current build live.
+4. **Build area** — sections appear per chip selection. **Cardio
+   section pinned top** when cardio chip is selected.
+5. **Per section:** standard exercises + supersets + section-level
+   `+ ADD EXERCISE` and `+ SAVED SUPERSET` buttons.
 
-Section headers + the workout name appear once content exists, derived
-from the rules above.
+Section headers + workout name derive from chip selection + content,
+as today.
 
 ### Behaviors
 
-- **`+ ADD EXERCISE` flow** — exercise picker → if build is non-empty,
-  a "where does this go?" modal shows existing supersets (concise
-  card-per-superset: exercise names only, with section header for
-  context) + a `+ NEW SUPERSET` option. Picking an existing one
-  appends the exercise into that superset; picking `+ NEW SUPERSET`
-  creates a singleton.
-- **Swipe-to-delete** — universal remove mechanism across all
-  exercise states (supersedes WE-57 two-tap ⊖). Two-stage: first
-  swipe reveals a DELETE affordance; second commits. Outside-tap
-  collapses, matching today's mutual-exclusion model.
-- **Per-exercise action cluster — three-state model (refined
-  2026-06-07).** Controls available depend on the exercise's context;
-  supersedes WE-58 cluster entirely.
+- **`+ ADD EXERCISE` flow** — opens picker modal. Picker surfaces
+  recommendations from history alongside the full exercise list
+  (recs are no longer a separate Builder area). On exercise pick:
+  - If the section has no supersets yet: exercise lands as a new
+    singleton.
+  - If the section already has supersets: a follow-up "where does
+    this go?" modal lists existing supersets (concise — just the
+    exercise names, with section header) plus a `+ NEW SUPERSET`
+    option. Picking an existing one appends the exercise into that
+    superset; `+ NEW SUPERSET` lands it as a new singleton.
+- **Swipe-to-delete** — universal remove mechanism for any exercise
+  row (supersedes WE-57 two-tap `⊖`). Two-stage: first swipe reveals
+  a DELETE affordance; second swipe (or tap on the affordance)
+  commits. Outside-tap collapses, matching today's mutual-exclusion
+  model. Swipe-to-delete also works on the cardio section block.
+- **Per-exercise action cluster — three-state model.** Controls
+  available depend on the exercise's context; supersedes WE-58
+  cluster entirely.
 
   | State | Controls |
   |---|---|
@@ -114,41 +143,58 @@ from the rules above.
 
   No `⤵` merge-down icon — merging is exclusively driven by the
   singleton-with-peers merge icon → modal flow above. The Rev 10
-  `⤴` / `⤵` cluster goes away entirely.
+  `⤴` / `⤵` cluster goes away entirely. `↑` / `↓` stay as button
+  arrows (NOT swipe).
 - **Save-as-superset selector** — only renders on 2+ exercise
   supersets (singletons get nothing). **Positioned at the top** of
   the superset card. Resolves the Phase 1B known issue about
-  misleading singleton save buttons (struck below). Refined
-  2026-06-07.
+  misleading singleton save buttons (struck below).
 
 ### Rules-doc impact (v1.4 bump)
 
 - **Supersedes WE-57** (two-tap remove) — replaced by swipe-to-delete.
 - **Supersedes WE-58** (action cluster `↑ ↓ ⤴ ⤵ ⊖`) — `⊖` → swipe;
-  `⤴`/`⤵` → three-state cluster (per refinement 2026-06-07): singleton+peers
-  shows merge-icon → modal, in-superset shows `↑`/`↓`/breakout, lone singleton
-  greyed. `↑`/`↓` stay as button arrows (NOT swipe per user pref).
-- **Supersedes WE-61 in part** — save-as-superset selector renders only on
-  2+ ex supersets and lives at the top of the card, not the bottom.
-- **New rules needed:**
-  - Builder layout (the 4-item blank state above)
-  - Muscle-group derivation from exercises (replaces chip-grid
-    selection rules)
-  - `+ ADD EXERCISE` → "where does this go?" modal flow
-  - Merge-icon modal flow
-  - Pinned `+ ADD CARDIO` section semantics
-- **Untouched but worth re-citing:** WE-59 (primary-group tag),
-  WE-60/61/62 (save/library), WE-63 (auto-name — `[GROUP]` derivation
-  pulled forward from chips into the new derivation rule).
+  `⤴` / `⤵` → three-state cluster: singleton+peers shows merge-icon
+  → modal, in-superset shows `↑` / `↓` / breakout, lone singleton
+  greyed. `↑` / `↓` stay as button arrows.
+- **Supersedes WE-15 + WE-55 in part** — recommendations leave the
+  Builder layout; new home is inside the `+ ADD EXERCISE` picker
+  modal. The Builder Build / Recs split structurally goes away;
+  Build area + sections + per-section action buttons remain.
+- **Supersedes WE-61 in part** — save-as-superset selector renders
+  only on 2+ ex supersets, top-positioned (was bottom).
+- **Modifies WE-63 superset rule** — `[GROUP]` derivation for saved
+  supersets changes from section-based to exercise-based (first
+  exercise's primary + `/` + disparate mgs in add-order). Workout
+  rule unchanged. **Code change required at Rev 11 time** (replaces
+  the `autoNameGroupKey([mg])` call in the Save Superset handler
+  with the new exercise-walking derivation).
+- **Untouched and still valid:** WE-30 (chip grid + pair emphasis),
+  WE-31 (Add Exercise picker — gains rec integration in Rev 11 but
+  the accordion-rows-with-history pattern survives), WE-59 (primary-
+  group tag), WE-60 (Save Workout), WE-62 (Saved Library screen),
+  WE-63 workout rule, plus all of Parts 1–9 outside the above.
+- **New rules needed (WE-64+):**
+  - Builder top-level layout with workout-level `+ SAVED WORKOUT` +
+    `▶ START NOW` placement
+  - Cardio default-selected + pinned-top behaviour
+  - `+ ADD EXERCISE` flow with rec integration + "where does this
+    go?" follow-up
+  - Three-state action cluster spec
+  - Merge-icon modal flow spec
+  - Swipe-to-delete behaviour spec
+  - `+ SAVED WORKOUT` overwrite-current-build semantics
+  - iPhone long-press drag-to-group — Phase 7 / PWA-era deferred
+    rule, spec'd here for forward reference
 
 ### Deferred to Phase 7 (PWA-era touch polish)
 
 - **iPhone long-press drag-to-group** — touch-native version of the
   merge flow, modeled on iOS home-screen folder creation. Per user
-  note: "this last part may be added to outstanding items while still
-  working on ui/ux pre-iPhone." Phase 7 territory; track here so the
-  Rev 11 merge-icon modal is built in a way that doesn't make the
-  long-press flow harder to bolt on later.
+  note: "this last part may be added to outstanding items while
+  still working on ui/ux pre-iPhone." Phase 7 territory; track here
+  so the Rev 11 merge-icon modal is built in a way that doesn't
+  make the long-press flow harder to bolt on later.
 
 ## Palette
 
