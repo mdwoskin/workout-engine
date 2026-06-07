@@ -7,13 +7,13 @@ editing code on a new machine. Update as part of every commit per WE-46.
 
 ## Last updated
 
-- **Build-state commit:** `<pending>` — Rev 10 step 7 (wrap commit:
-  cumulative CHANGELOG rollup, CLAUDE.md §5 bump, Rev 11 OUTSTANDING
-  refinements folded in, `we-v1.2` annotated tag). Local only; push
-  pending (step 8).
-- **HANDOFF.md last edit:** 2026-06-07, ASUS session (Rev 10 wrap —
-  step 7 ship; `we-v1.2` tag lands on this commit per WE-42; next is
-  step 8 = `git push origin main --tags` → GH Pages deploy).
+- **Build-state commit:** `ae264b6` — Rev 10 step 7 wrap (cumulative
+  CHANGELOG rollup, CLAUDE.md §5 bump, Rev 11 OUTSTANDING refinements
+  folded in, `we-v1.2` annotated tag landed on this commit). Pushed
+  to `origin/main` as step 8.
+- **HANDOFF.md last edit:** 2026-06-07, ASUS session (session wrap —
+  step 7 hash backfilled; step 8 push executed; Rev 10 fully closed
+  at `we-v1.2`).
 
 ---
 
