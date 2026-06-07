@@ -4,6 +4,24 @@ Chronological build log. Each rev = a deliverable in chat.
 
 ---
 
+## Phase 1B Rev 10 step 5 — Saved Library screen (in-memory) — 2026-06-07
+**Status: committed locally, push pending**
+
+- WE-62: new `screen-saved-library` with WORKOUTS / SUPERSETS toggle pills, card list, empty state. Header has `← BACK` that returns to whichever screen launched the library (Home or Builder)
+- Entry points: Home `📋 SAVED TEMPLATES` block button (always visible regardless of saved count); per-section Builder `📋 INSERT SAVED SUPERSET` dashed button (non-cardio only) alongside `+ NEW SUPERSET`. The Builder entry sets a context (`{ mg }`) so the library opens in supersets mode pre-filtered to that section and `▶ Use` knows where to inject
+- Cards render name (Bebas, like card titles elsewhere), meta row (`date · ex count · used N×`), structure preview, and `▶ Use` / `✕ Delete` actions. Workouts preview is section-grouped (`Back: Pull-Ups · Dumbbell Curls / Biceps: …`); supersets preview is a single section header + dot-separated ex names
+- Sort by `savedAt` desc (ISO strings, lexicographic `localeCompare` reverse). Empty state per mode (with per-mg variant when the supersets mode is filtered to a Builder section)
+- `▶ Use` on a saved workout clobbers `buildState` — clears `selectedMG` + `buildState` + `pulledRecs`, then walks the saved sections to re-seed. Re-uses the existing `updateChips()` cascade for re-render. Switches to Builder. Increments `useCount`. Matches `+ Pull in` replace semantics per the HANDOFF default
+- `▶ Use` on a saved superset is only enabled when the library was opened from a Builder section (the only path where there's an unambiguous insertion target). Appends a new `{ exs, origin: 'normal' }` superset onto `buildState[mg]`, increments `useCount`, switches to Builder. Hidden in the Home-entry / no-context case (Delete still available)
+- **Hydration on Use** — saved templates carry only `{ name, primary }` per WE-60/61 structure-only, but the Builder renderer needs `ex.sets` (4-cell grid) and `ex.reps`. `hydrateInsertedEx` injects placeholder `sets: ['—','—','—','—']` and `reps: '—'` at Use time so the renderer has something to draw. Phase 4 will replace these placeholders with shadow-populated values from history per WE-11. Diagnosed during 2026-06-07 phone test — initial draft skipped this and `updateSectionsArea` threw `undefined is not an object (evaluating 'ex.sets.forEach')` mid-execution, silently dropping the Use action
+- `✕ Delete` splices the in-memory array and toasts `Deleted: [name]`. No confirm dialog, no undo — matches the lightweight in-memory phase. Use is also a toast (`Loaded:` / `Inserted:`)
+- Schema bump: `savedWorkouts` / `savedSupersets` entries gained a `useCount: 0` field at save-time, incremented on `▶ Use`. Existing comment at the state declaration updated to reflect the new shape and that the Save handlers initialize it. No behavioral change for already-saved entries in a running session — they start at 0 the first time Use bumps them
+- Delegated handler on `#sl-list` for both `▶ Use` and `✕ Delete` actions (re-renders the list on every change, so re-binding per card would be wasted). Toggle pills + `← BACK` + Home entry point are bound once on init
+- New CSS: `.sl-toggle` pill row (40px, active = accent fill), `.sl-card` (border + name + meta + preview + actions), `.sl-preview` dashed-border block with section headers, `.sl-empty` dashed empty state
+- No `buildState` shape changes. No Dexie. State still clears on reload (Phase 3 wires `saved_workouts` / `saved_supersets` from WE-34)
+- HANDOFF.md updated: step 5 marked DONE; NEXT advances to step 6 (WE-63 auto-name logic) with phone-test review gate cleared at this step
+- OUTSTANDING_ITEMS.md: WE-62 line struck
+
 ## Phase 1B Rev 10 step 4 — save buttons (in-memory) — 2026-05-16
 **Status: committed locally, push pending**
 

@@ -198,6 +198,21 @@
   .cluster-btn.rm.expanded { width: auto; padding: 0 10px; height: 24px; background: var(--danger); color: #fff; font-weight: 700; font-size: 10px; letter-spacing: 0.06em; border-color: var(--danger); }
   .empty-ss { padding: 12px 10px; text-align: center; font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--text-faint); display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap; }
   .empty-ss span { flex: 1; text-align: left; }
+  /* ===== Rev 10 step 5: Saved Library screen (WE-62) ===== */
+  .sl-toggle { display: flex; border: 1px solid var(--border-hi); border-radius: 8px; overflow: hidden; margin-bottom: 12px; }
+  .sl-toggle button { flex: 1; height: 36px; background: var(--bg-2); border: none; color: var(--text-dim); font-family: 'JetBrains Mono', monospace; font-size: 11px; font-weight: 700; letter-spacing: 0.08em; cursor: pointer; text-transform: uppercase; }
+  .sl-toggle button.on { background: var(--accent); color: var(--bg); }
+  .sl-context { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--text-faint); margin-bottom: 8px; letter-spacing: 0.05em; text-transform: uppercase; }
+  .sl-card { background: var(--bg-1); border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px; margin-bottom: 8px; }
+  .sl-card .sl-name { font-family: 'Bebas Neue', sans-serif; font-size: 15px; letter-spacing: 0.04em; color: var(--text); margin-bottom: 2px; }
+  .sl-card .sl-meta { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--text-faint); margin-bottom: 8px; }
+  .sl-card .sl-preview { background: var(--bg); border: 1px dashed var(--border); border-radius: 6px; padding: 8px 10px; margin-bottom: 8px; font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--text-dim); line-height: 1.6; }
+  .sl-card .sl-preview .sl-sec-h { color: var(--text-faint); letter-spacing: 0.05em; text-transform: uppercase; margin-top: 4px; }
+  .sl-card .sl-preview .sl-sec-h:first-child { margin-top: 0; }
+  .sl-card .sl-preview .sl-ex { color: var(--text); padding-left: 8px; }
+  .sl-card .sl-actions { display: flex; gap: 6px; }
+  .sl-card .sl-actions .btn { flex: 1; height: 32px; font-size: 11px; }
+  .sl-empty { text-align: center; padding: 40px 16px; border: 1px dashed var(--border-hi); border-radius: 8px; color: var(--text-faint); font-family: 'JetBrains Mono', monospace; font-size: 11px; line-height: 1.6; }
 </style>
 </head>
 <body>
@@ -211,6 +226,7 @@
   </div>
   <div class="body">
     <button class="btn primary block" style="height: 56px; font-size: 14px;" data-go="builder">+ CREATE NEW WORKOUT</button>
+    <button class="btn block" style="height: 44px; margin-top: 6px;" data-saved-library-from="home">📋 SAVED TEMPLATES</button>
 
     <div>
       <div class="sec-h"><h2>In Progress</h2><span class="m">1 plan</span></div>
@@ -449,6 +465,23 @@
         <!-- Rendered dynamically -->
       </div>
     </div>
+  </div>
+</div>
+
+<!-- SAVED LIBRARY (WE-62) -->
+<div class="screen" id="screen-saved-library">
+  <div class="head">
+    <button class="btn-icon" id="sl-back">← BACK</button>
+    <div style="text-align: center;"><div class="ttl">SAVED TEMPLATES</div><div class="sub" id="sl-sub">Phase 1B · in-memory</div></div>
+    <div style="width: 32px;"></div>
+  </div>
+  <div class="body">
+    <div class="sl-toggle" id="sl-toggle">
+      <button data-sl-mode="workouts" class="on">Workouts</button>
+      <button data-sl-mode="supersets">Supersets</button>
+    </div>
+    <div class="sl-context" id="sl-context" style="display: none;"></div>
+    <div id="sl-list"></div>
   </div>
 </div>
 
@@ -757,15 +790,16 @@
   // Keyed by muscle group; Set of recommendation indices that have been pulled
   const pulledRecs = {};
 
-  // ===== WE-60 / WE-61 saved templates (Phase 1B in-memory) =====
+  // ===== WE-60 / WE-61 / WE-62 saved templates (Phase 1B in-memory) =====
   // Structure only — no weights/reps, just the exercise identity per WE-60.
   // Phase 1B placeholder: held in JS memory; cleared on reload. Phase 3 (Dexie)
   // wires the saved_workouts / saved_supersets stores from WE-34.
   // Names default to "Custom Workout #N" / "Custom Superset #N" via the save
   // prompt; user edits inline. WE-63 (step 6) replaces the default with the
   // full auto-name format `Custom [GROUP] [Type] #N`.
-  const savedWorkouts = [];     // [{ id, name, savedAt, sections: { [mg]: [{ exs }] } }]
-  const savedSupersets = [];    // [{ id, name, savedAt, sectionMg, exs }]
+  // useCount: increments on each ▶ Use from the Saved Library (WE-62).
+  const savedWorkouts = [];     // [{ id, name, savedAt, useCount, sections: { [mg]: [{ exs }] } }]
+  const savedSupersets = [];    // [{ id, name, savedAt, useCount, sectionMg, exs }]
   let savedWorkoutSeq = 1;      // next #N for the workout auto-name stub
   let savedSupersetSeq = 1;     // next #N for the superset auto-name stub
 
@@ -935,6 +969,8 @@
       html += `<button class="btn sm block" style="margin-top: 8px;" data-modal-add="${mg}">+ ADD EXERCISE TO ${name.toUpperCase()}</button>`;
       if (!isCardio) {
         html += `<button class="btn sm block" style="background: transparent; border-style: dashed;" data-new-superset="${mg}">+ NEW SUPERSET</button>`;
+        // WE-62: entry point into Saved Library, filtered to this section's mg
+        html += `<button class="btn sm block" style="background: transparent; border-style: dashed;" data-insert-saved-superset="${mg}">📋 INSERT SAVED SUPERSET</button>`;
       }
       html += `</div>`; // /build-area
 
@@ -1101,7 +1137,7 @@
             }));
           }
         });
-        savedWorkouts.push({ id: savedWorkoutSeq, name, savedAt: new Date().toISOString(), sections });
+        savedWorkouts.push({ id: savedWorkoutSeq, name, savedAt: new Date().toISOString(), useCount: 0, sections });
         savedWorkoutSeq++;
         toast(`Saved workout: ${name}`);
       });
@@ -1123,11 +1159,20 @@
           id: savedSupersetSeq,
           name,
           savedAt: new Date().toISOString(),
+          useCount: 0,
           sectionMg: mg,
           exs: ss.exs.map(ex => ({ name: ex.name, primary: ex.primary }))
         });
         savedSupersetSeq++;
         toast(`Saved superset: ${name}`);
+      });
+    });
+    // WE-62: Insert Saved Superset entry — opens Saved Library in supersets mode
+    // pre-filtered to this section's muscle group. ▶ Use injects into this section.
+    area.querySelectorAll('[data-insert-saved-superset]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const mg = btn.getAttribute('data-insert-saved-superset');
+        openSavedLibrary('builder', 'supersets', { mg });
       });
     });
     // WE-58 move dispatcher (↑ ↓ ⤴ ⤵) — single handler for all four cluster moves.
@@ -1151,6 +1196,191 @@
       });
     });
   }
+
+  // ===== WE-62 Saved Library (Phase 1B in-memory) =====
+  // Single screen with WORKOUTS / SUPERSETS toggle. Entered from:
+  //   - Home: `📋 SAVED TEMPLATES` → workouts mode, no context filter
+  //   - Builder section: `📋 INSERT SAVED SUPERSET` → supersets mode, filtered to
+  //     that section's mg; ▶ Use appends a new superset onto that section.
+  // ▶ Use on a saved workout clobbers buildState (matches `+ Pull in` replace
+  // semantics — see HANDOFF "Next step" spec). State clears on reload until
+  // Phase 3 Dexie wiring.
+  let savedLibraryMode = 'workouts';   // 'workouts' | 'supersets'
+  let savedLibraryReturnTo = 'home';   // screen id to go back to from ← BACK
+  let savedLibraryContext = null;      // { mg } when arrived from a builder section; null otherwise
+
+  function openSavedLibrary(returnTo, mode, context) {
+    savedLibraryReturnTo = returnTo;
+    savedLibraryMode = mode || 'workouts';
+    savedLibraryContext = context || null;
+    renderSavedLibrary();
+    go('saved-library');
+  }
+
+  function renderSavedLibrary() {
+    document.querySelectorAll('#sl-toggle button').forEach(b => {
+      b.classList.toggle('on', b.dataset.slMode === savedLibraryMode);
+    });
+    const ctxEl = document.getElementById('sl-context');
+    if (savedLibraryContext && savedLibraryContext.mg) {
+      ctxEl.style.display = '';
+      ctxEl.textContent = `Insert into ${mgNames[savedLibraryContext.mg]} section`;
+    } else {
+      ctxEl.style.display = 'none';
+      ctxEl.textContent = '';
+    }
+    const list = document.getElementById('sl-list');
+    const items = savedLibraryMode === 'workouts'
+      ? savedWorkouts.slice()
+      : savedSupersets.slice().filter(s =>
+          !savedLibraryContext || !savedLibraryContext.mg || s.sectionMg === savedLibraryContext.mg);
+    items.sort((a, b) => (b.savedAt || '').localeCompare(a.savedAt || ''));
+    if (items.length === 0) {
+      let msg;
+      if (savedLibraryMode === 'workouts') {
+        msg = 'No saved workouts yet.<br>Save one from the Builder.';
+      } else if (savedLibraryContext && savedLibraryContext.mg) {
+        msg = `No saved supersets for ${mgNames[savedLibraryContext.mg]} yet.<br>Save one from the Builder.`;
+      } else {
+        msg = 'No saved supersets yet.<br>Save one from the Builder.';
+      }
+      list.innerHTML = `<div class="sl-empty">${msg}</div>`;
+      return;
+    }
+    // ▶ Use is enabled for workouts always (clobber), and for supersets only when arrived from a builder section
+    const useEnabled = savedLibraryMode === 'workouts' || !!(savedLibraryContext && savedLibraryContext.mg);
+    let html = '';
+    items.forEach(item => {
+      const dateStr = item.savedAt ? new Date(item.savedAt).toLocaleDateString() : '—';
+      const useCount = item.useCount || 0;
+      if (savedLibraryMode === 'workouts') {
+        const exCount = Object.values(item.sections || {}).reduce(
+          (n, supersets) => n + supersets.reduce((m, ss) => m + ss.exs.length, 0), 0);
+        const previewHtml = Object.entries(item.sections || {}).map(([mg, supersets]) => {
+          const exs = supersets.flatMap(ss => ss.exs.map(ex => ex.name)).join(' · ');
+          return `<div class="sl-sec-h">${mgNames[mg] || mg}</div><div class="sl-ex">${exs}</div>`;
+        }).join('');
+        html += `<div class="sl-card">
+          <div class="sl-name">${item.name}</div>
+          <div class="sl-meta">${dateStr} · ${exCount} ex · used ${useCount}×</div>
+          <div class="sl-preview">${previewHtml}</div>
+          <div class="sl-actions">
+            ${useEnabled ? `<button class="btn primary sm" data-sl-use="workout" data-sl-id="${item.id}">▶ Use</button>` : ''}
+            <button class="btn sm danger" data-sl-delete="workout" data-sl-id="${item.id}">✕ Delete</button>
+          </div>
+        </div>`;
+      } else {
+        const exs = item.exs.map(ex => ex.name).join(' · ');
+        html += `<div class="sl-card">
+          <div class="sl-name">${item.name}</div>
+          <div class="sl-meta">${dateStr} · ${item.exs.length} ex · used ${useCount}×</div>
+          <div class="sl-preview"><div class="sl-sec-h">${mgNames[item.sectionMg] || item.sectionMg}</div><div class="sl-ex">${exs}</div></div>
+          <div class="sl-actions">
+            ${useEnabled ? `<button class="btn primary sm" data-sl-use="superset" data-sl-id="${item.id}">▶ Use</button>` : ''}
+            <button class="btn sm danger" data-sl-delete="superset" data-sl-id="${item.id}">✕ Delete</button>
+          </div>
+        </div>`;
+      }
+    });
+    list.innerHTML = html;
+    // Direct per-button binding (matches the codebase's wireBuilderEvents pattern).
+    // Earlier draft used a single delegated listener on #sl-list, but iOS Safari
+    // can drop bubbled clicks on plain-div delegation roots after innerHTML
+    // replacement — surfaced during 2026-06-07 phone test (▶ Use silently no-op'd).
+    list.querySelectorAll('[data-sl-use]').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const id = parseInt(btn.dataset.slId);
+        if (btn.dataset.slUse === 'workout') useWorkout(id);
+        else if (btn.dataset.slUse === 'superset') useSuperset(id);
+      });
+    });
+    list.querySelectorAll('[data-sl-delete]').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        deleteSavedItem(btn.dataset.slDelete, parseInt(btn.dataset.slId));
+      });
+    });
+  }
+
+  // Saved templates are structure-only per WE-60/61 (name + primary, no sets/reps).
+  // The Build-area renderer expects ex.sets to exist (renderBuildExRow iterates 4 cells).
+  // Hydrate placeholder sets/reps at injection time so the renderer has something to draw;
+  // Phase 4 will replace these with shadow-populated values from history per WE-11.
+  function hydrateInsertedEx(ex) {
+    return { name: ex.name, primary: ex.primary, reps: '—', sets: ['—', '—', '—', '—'] };
+  }
+
+  function useWorkout(id) {
+    const w = savedWorkouts.find(s => s.id === id);
+    if (!w) return;
+    // Clobber current build per HANDOFF default — matches `+ Pull in` replace semantics
+    selectedMG.clear();
+    Object.keys(buildState).forEach(k => delete buildState[k]);
+    Object.keys(pulledRecs).forEach(k => delete pulledRecs[k]);
+    Object.entries(w.sections || {}).forEach(([mg, supersets]) => {
+      selectedMG.add(mg);
+      buildState[mg] = supersets.map(ss => ({
+        exs: ss.exs.map(hydrateInsertedEx),
+        origin: 'normal'
+      }));
+      pulledRecs[mg] = new Set();
+    });
+    w.useCount = (w.useCount || 0) + 1;
+    updateChips();  // cascades to updatePairBlurb / updatePlanName / updateSectionsArea
+    toast(`Loaded: ${w.name}`);
+    go('builder');
+  }
+
+  function useSuperset(id) {
+    const s = savedSupersets.find(x => x.id === id);
+    if (!s) return;
+    if (!savedLibraryContext || !savedLibraryContext.mg) return;
+    const mg = savedLibraryContext.mg;
+    if (!buildState[mg]) buildState[mg] = [];
+    buildState[mg].push({
+      exs: s.exs.map(hydrateInsertedEx),
+      origin: 'normal'
+    });
+    s.useCount = (s.useCount || 0) + 1;
+    updateSectionsArea();
+    toast(`Inserted: ${s.name}`);
+    go('builder');
+  }
+
+  function deleteSavedItem(kind, id) {
+    if (kind === 'workout') {
+      const idx = savedWorkouts.findIndex(s => s.id === id);
+      if (idx === -1) return;
+      const removed = savedWorkouts.splice(idx, 1)[0];
+      toast(`Deleted: ${removed.name}`);
+    } else {
+      const idx = savedSupersets.findIndex(s => s.id === id);
+      if (idx === -1) return;
+      const removed = savedSupersets.splice(idx, 1)[0];
+      toast(`Deleted: ${removed.name}`);
+    }
+    renderSavedLibrary();
+  }
+
+  // Toggle pills
+  document.querySelectorAll('#sl-toggle button').forEach(btn => {
+    btn.addEventListener('click', () => {
+      savedLibraryMode = btn.dataset.slMode;
+      renderSavedLibrary();
+    });
+  });
+  // ← BACK returns to whichever screen launched the library
+  document.getElementById('sl-back').addEventListener('click', () => {
+    go(savedLibraryReturnTo);
+  });
+  // Home `📋 SAVED TEMPLATES` entry point
+  document.querySelectorAll('[data-saved-library-from="home"]').forEach(btn => {
+    btn.addEventListener('click', () => openSavedLibrary('home', 'workouts', null));
+  });
+  // ▶ Use / ✕ Delete handlers are bound directly to each button inside renderSavedLibrary
+  // after the innerHTML write, so no init-time binding is needed here.
+
   document.querySelectorAll('#chip-grid .chip').forEach(c => {
     c.addEventListener('click', () => {
       const mg = c.getAttribute('data-mg');
