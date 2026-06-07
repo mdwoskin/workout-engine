@@ -130,6 +130,32 @@ from the rules above.
   Rev 11 merge-icon modal is built in a way that doesn't make the
   long-press flow harder to bolt on later.
 
+## Palette
+
+**Palette refresh — "Teal/dark" (approved 2026-06-07)**
+
+Tokens to apply across `index.html` when palette refresh ships:
+
+```
+bg:        0A0F0E  (use dark version — current BFF3E7 is inverted, darkest readable bg in this family)
+surface:   1C2725
+surf_el:   1C2725
+txt_p:     1F8A7E
+txt_s:     216F66
+accent:    1F8A7E
+data:      1F8A7E
+success:   1F8A7E
+destruct:  B14646
+chart_lo:  B1E2DC
+chart_hi:  76DACE
+```
+
+Notes:
+- Several tokens share the same value (`surf_el = surface`, `txt_p = accent = data = success`). May want to differentiate surface/surf_el and success/accent before shipping — or keep flat and revisit in v2.
+- `bg` token as captured (`BFF3E7`) appears to be a light version; replace with a dark teal bg when implementing. Suggest `0A0F0E` or `0D1A18`.
+- Commit when ready as: `WE: palette refresh — teal/dark`
+- Phone-test gate applies before push per CLAUDE.md
+
 ## Carryover from 2026-05-15 deploy session
 
 1. ~~**Tag convention question (WE-42 vs WE-46).**~~ Resolved 2026-05-15: `we-v1.1` tagged retroactively on `bc095cc` (Phase 1 deploy point); Rev 10 will ship as `we-v1.2`. Preserves the WE-46 1:1 changelog ↔ pipeline mapping.
